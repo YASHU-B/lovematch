@@ -15,6 +15,7 @@ import {
 import { soundEffects } from "@/components/AudioEffects";
 import { NotebookQuestionCard } from "@/components/NotebookQuestionCard";
 import { KawaiiBear, KawaiiPanda, WavyUnderline } from "@/components/KawaiiCharacters";
+import { AdBanner } from "@/components/AdBanner";
 
 interface QuizQuestion {
   id: string;
@@ -251,6 +252,9 @@ function QuizTakingContent({
               {quiz.creatorName} will see your score on the live scoreboard!
             </p>
           </div>
+
+          {/* Ad Placement: Between Join Card & Live Scoreboard */}
+          <AdBanner slotId={process.env.NEXT_PUBLIC_ADSENSE_SLOT_QUIZ} />
 
           {/* Live Leaderboard / Hall of Fame Card directly on the Join Screen */}
           <div className="bg-white border-3 border-slate-900 rounded-3xl p-6 sm:p-7 shadow-[0_8px_0_#1E293B]">

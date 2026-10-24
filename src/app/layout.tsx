@@ -4,6 +4,7 @@ import "./globals.css";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { KawaiiSkyBackground } from "@/components/KawaiiSkyBackground";
+import Script from "next/script";
 
 const fredoka = Fredoka({
   subsets: ["latin"],
@@ -61,8 +62,20 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const adsenseClientId = process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID;
+
   return (
     <html lang="en" className={`${fredoka.variable} ${nunito.variable} h-full antialiased`}>
+      <head>
+        {adsenseClientId && !adsenseClientId.includes("0000000000000000") && (
+          <Script
+            id="google-adsense"
+            strategy="afterInteractive"
+            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseClientId}`}
+            crossOrigin="anonymous"
+          />
+        )}
+      </head>
       <body className="min-h-full flex flex-col bg-[#8AC0EF] text-[#1E293B] selection:bg-pink-400 selection:text-white font-sans">
         <KawaiiSkyBackground />
         <Navbar />

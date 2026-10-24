@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { soundEffects } from "@/components/AudioEffects";
 import { KawaiiBear, KawaiiPanda } from "@/components/KawaiiCharacters";
+import { AdBanner } from "@/components/AdBanner";
 
 interface Attempt {
   id: string;
@@ -188,6 +189,9 @@ function ScoreboardContent({
           </button>
         </div>
       </div>
+
+      {/* Ad Placement: Above Leaderboard Ranking */}
+      <AdBanner slotId={process.env.NEXT_PUBLIC_ADSENSE_SLOT_SCORES} />
 
       {/* Friends Leaderboard List */}
       <div className="bg-white border-3 border-slate-900 rounded-3xl p-6 shadow-[0_8px_0_#1E293B] mb-6">

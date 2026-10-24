@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Sparkles, ArrowRight } from "lucide-react";
 import { PlayfulMascot } from "@/components/PlayfulMascot";
 import { soundEffects } from "@/components/AudioEffects";
+import { AdBanner } from "@/components/AdBanner";
 
 export default function LandingPage() {
   const router = useRouter();
@@ -134,6 +135,11 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+
+      {/* Ad Placement: Below Hero */}
+      <div className="w-full max-w-2xl px-4 mt-2 mb-2">
+        <AdBanner slotId={process.env.NEXT_PUBLIC_ADSENSE_SLOT_HOME} />
+      </div>
 
       {/* How it Works Section */}
       <section className="w-full max-w-4xl px-4 sm:px-6 py-12 mx-auto">
