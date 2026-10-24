@@ -8,16 +8,17 @@ import {
   Sparkles, 
   Heart, 
   Lock, 
-  CheckCircle2, 
-  XCircle, 
   ArrowRight, 
   Copy, 
   Check, 
   Loader2, 
   WifiOff, 
-  Clock 
+  Clock,
+  Share2
 } from "lucide-react";
 import { AuthorizedRoomState } from "@/lib/db/schema";
+import { InteractiveOptionCard } from "@/components/InteractiveOptionCard";
+import { CardRevealAnimation } from "@/components/CardRevealAnimation";
 
 function RoomContent({
   params
@@ -357,24 +358,31 @@ function RoomContent({
             </button>
           </div>
 
-          <button
-            onClick={async () => {
-              if (navigator.share) {
-                await navigator.share({
-                  title: "Join my LoveMatch quiz!",
-                  text: `Join my LoveMatch quiz room with code ${roomCode}!`,
-                  url: inviteUrl
-                }).catch(() => {});
-              } else {
-                navigator.clipboard.writeText(inviteUrl);
-                alert("Invite link copied to clipboard!");
-              }
-            }}
-            className="w-full min-touch-target flex items-center justify-center gap-2 py-4 rounded-2xl bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 text-white font-extrabold text-base shadow-xl shadow-pink-500/35"
-          >
-            <Sparkles className="w-5 h-5" />
-            <span>Send Invite Link</span>
-          </button>
+          <div className="space-y-3 mb-2">
+            <button
+              onClick={() => {
+                const text = encodeURIComponent(
+                  `Join my LoveMatch quiz! Room Code: ${roomCode}\nTap here to play:\n${inviteUrl}`
+                );
+                window.open(`https://api.whatsapp.com/send?text=${text}`, "_blank");
+              }}
+              className="w-full min-touch-target flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-[#25D366]/20 hover:bg-[#25D366]/30 border border-[#25D366]/40 text-[#25D366] font-bold text-sm transition-all"
+            >
+              <Share2 className="w-4 h-4" />
+              <span>Share via WhatsApp</span>
+            </button>
+
+            <button
+              onClick={async () => {
+                await navigator.clipboard.writeText(inviteUrl);
+                alert("Direct invite link copied to clipboard!");
+              }}
+              className="w-full min-touch-target flex items-center justify-center gap-2 py-3 rounded-2xl glass-card text-pink-200 hover:text-white text-xs font-semibold"
+            >
+              <Copy className="w-4 h-4 text-pink-400" />
+              <span>Copy Direct Invite Link</span>
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -474,55 +482,18 @@ function RoomContent({
           </h2>
         </div>
 
-        {/* Revealed State Banner */}
+        {/* Revealed State Banner with 3D Flip & Particles */}
         {isRevealed ? (
           <div className="space-y-4 my-2">
-            {/* Match or Mismatch Card */}
-            <div className={`p-4 rounded-2xl border text-center ${
-              currentRound.isMatch
-                ? "bg-emerald-500/20 border-emerald-400/50 text-emerald-200"
-                : "bg-rose-500/20 border-rose-400/50 text-rose-200"
-            }`}>
-              <div className="flex items-center justify-center gap-2 text-lg font-black mb-1">
-                {currentRound.isMatch ? (
-                  <>
-                    <CheckCircle2 className="w-6 h-6 text-emerald-400" />
-                    <span>It&apos;s a Match! (+10 pts)</span>
-                  </>
-                ) : (
-                  <>
-                    <XCircle className="w-6 h-6 text-rose-400" />
-                    <span>Plot Twist! (0 pts)</span>
-                  </>
-                )}
-              </div>
-              <p className="text-xs text-pink-150 text-pink-200/80">
-                {currentRound.isMatch
-                  ? "Great intuition! You both were in complete sync."
-                  : "Different perspectives make conversations richer!"}
-              </p>
-            </div>
-
-            {/* Side by side answer comparison */}
-            <div className="grid grid-cols-2 gap-3 text-left">
-              <div className="glass-card rounded-2xl p-3 border border-pink-500/40 bg-pink-500/10">
-                <span className="text-[11px] font-bold text-pink-300 block mb-1">
-                  {isSubject ? "Your Answer" : `${partnerPlayer?.nickname}'s Answer`}
-                </span>
-                <span className="text-sm font-extrabold text-white">
-                  {currentRound.subjectAnswer}
-                </span>
-              </div>
-
-              <div className="glass-card rounded-2xl p-3 border border-purple-500/40 bg-purple-500/10">
-                <span className="text-[11px] font-bold text-purple-300 block mb-1">
-                  {isGuesser ? "Your Prediction" : `${partnerPlayer?.nickname}'s Prediction`}
-                </span>
-                <span className="text-sm font-extrabold text-white">
-                  {currentRound.guesserPrediction}
-                </span>
-              </div>
-            </div>
+            <CardRevealAnimation
+              isMatch={Boolean(currentRound.isMatch)}
+              subjectNickname={myPlayer?.nickname || "Player 1"}
+              guesserNickname={partnerPlayer?.nickname || "Player 2"}
+              subjectAnswer={currentRound.subjectAnswer || ""}
+              guesserPrediction={currentRound.guesserPrediction || ""}
+              isSubject={isSubject}
+              isGuesser={isGuesser}
+            />
 
             {/* Advance Button */}
             <button
@@ -557,27 +528,14 @@ function RoomContent({
                 : selectedOption === opt;
 
               return (
-                <button
+                <InteractiveOptionCard
                   key={idx}
-                  type="button"
+                  index={idx}
+                  option={opt}
+                  isSelected={isSelected}
                   disabled={hasLocked}
-                  onClick={() => {
-                    soundEffects.playPop();
-                    setSelectedOption(opt);
-                  }}
-                  className={`w-full min-touch-target text-left px-4 py-3.5 rounded-2xl border text-sm font-semibold transition-all flex items-center justify-between ${
-                    isSelected
-                      ? "glass-card-selected text-white"
-                      : "glass-card text-pink-100 hover:text-white hover:border-pink-500/50"
-                  } ${hasLocked ? "cursor-default opacity-85" : "cursor-pointer"}`}
-                >
-                  <span>{opt}</span>
-                  {isSelected && (
-                    <span className="w-5 h-5 rounded-full bg-pink-500 flex items-center justify-center text-white shrink-0">
-                      <Check className="w-3.5 h-3.5" />
-                    </span>
-                  )}
-                </button>
+                  onSelect={(chosen) => setSelectedOption(chosen)}
+                />
               );
             })}
 

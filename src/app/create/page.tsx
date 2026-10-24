@@ -85,7 +85,7 @@ function CreateRoomContent() {
   const getInviteUrl = () => {
     if (!createdRoom) return "";
     const origin = typeof window !== "undefined" ? window.location.origin : "https://lovematch.app";
-    return `${origin}/challenge/${createdRoom.shareToken}`;
+    return `${origin}/join?code=${createdRoom.roomCode}`;
   };
 
   const handleCopyLink = async () => {
@@ -102,18 +102,26 @@ function CreateRoomContent() {
     setTimeout(() => setCopiedCode(false), 2500);
   };
 
+  const handleWhatsAppShare = () => {
+    if (!createdRoom) return;
+    const url = getInviteUrl();
+    const text = encodeURIComponent(
+      `Join my LoveMatch quiz! Room Code: ${createdRoom.roomCode}\nTap here to play:\n${url}`
+    );
+    window.open(`https://api.whatsapp.com/send?text=${text}`, "_blank");
+  };
+
   const handleNativeShare = async () => {
     if (!createdRoom) return;
     const url = getInviteUrl();
-    const shareData = {
-      title: "LoveMatch Challenge",
-      text: `${nickname} challenged you to a LoveMatch quiz! Room Code: ${createdRoom.roomCode}. Who knows who better?`,
-      url
-    };
 
     if (navigator.share) {
       try {
-        await navigator.share(shareData);
+        await navigator.share({
+          title: "LoveMatch Challenge",
+          text: `You've been challenged to a LoveMatch quiz! Who knows who better?`,
+          url
+        });
       } catch {
         // User dismissed
       }
@@ -276,20 +284,30 @@ function CreateRoomContent() {
           {/* Sharing Buttons */}
           <div className="space-y-3 mb-6">
             <button
-              onClick={handleNativeShare}
+              onClick={handleWhatsAppShare}
               className="w-full min-touch-target flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-[#25D366]/20 hover:bg-[#25D366]/30 border border-[#25D366]/40 text-[#25D366] font-bold text-sm transition-all"
             >
               <Share2 className="w-4 h-4" />
-              <span>Share via WhatsApp / Instagram</span>
+              <span>Share via WhatsApp</span>
             </button>
 
-            <button
-              onClick={handleCopyLink}
-              className="w-full min-touch-target flex items-center justify-center gap-2 py-3 rounded-2xl glass-card text-pink-200 hover:text-white text-xs font-semibold"
-            >
-              {copiedLink ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4 text-pink-400" />}
-              <span>{copiedLink ? "Link Copied to Clipboard!" : "Copy Full Invitation Link"}</span>
-            </button>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                onClick={handleCopyLink}
+                className="w-full min-touch-target flex items-center justify-center gap-1.5 py-3 rounded-2xl glass-card text-pink-200 hover:text-white text-xs font-semibold"
+              >
+                {copiedLink ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4 text-pink-400" />}
+                <span>{copiedLink ? "Copied!" : "Copy Link"}</span>
+              </button>
+
+              <button
+                onClick={handleNativeShare}
+                className="w-full min-touch-target flex items-center justify-center gap-1.5 py-3 rounded-2xl glass-card text-pink-200 hover:text-white text-xs font-semibold"
+              >
+                <Share2 className="w-4 h-4 text-pink-400" />
+                <span>Other Apps</span>
+              </button>
+            </div>
           </div>
 
           {/* Enter Room CTA */}

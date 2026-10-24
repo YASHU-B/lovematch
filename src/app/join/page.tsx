@@ -1,23 +1,43 @@
 "use client";
 
-import React, { useState, Suspense } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { LogIn, User, KeyRound, Loader2, AlertCircle, Heart } from "lucide-react";
+import { LogIn, User, KeyRound, Loader2, AlertCircle, Heart, CheckCircle2 } from "lucide-react";
+import { extractRoomCode } from "@/lib/tokens";
 
 function JoinRoomContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const codeParam = searchParams.get("code") || "";
-  const [roomCode, setRoomCode] = useState(codeParam.toUpperCase());
-  const [nickname, setNickname] = useState("");
+  const rawCode = searchParams.get("code") || "";
+  const initialCode = extractRoomCode(rawCode);
+
+  const [roomCode, setRoomCode] = useState(() => initialCode);
+  const [nickname, setNickname] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("lovematch_nickname") || "";
+    }
+    return "";
+  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Auto-redirect if player already has an active session token for this room
+  useEffect(() => {
+    if (typeof window !== "undefined" && initialCode) {
+      const existingSession = localStorage.getItem(`lovematch_token_${initialCode}`);
+      if (existingSession) {
+        router.push(`/room/${initialCode}`);
+      }
+    }
+  }, [initialCode, router]);
+
   const handleJoin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!roomCode.trim()) {
-      setError("Please enter the 6-character room code");
+    const cleanCode = extractRoomCode(roomCode);
+
+    if (!cleanCode) {
+      setError("Please enter a valid 6-character room code");
       return;
     }
     if (!nickname.trim()) {
@@ -33,7 +53,7 @@ function JoinRoomContent() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          roomCode: roomCode.trim().toUpperCase(),
+          roomCode: cleanCode,
           nickname: nickname.trim()
         })
       });
@@ -43,9 +63,10 @@ function JoinRoomContent() {
         throw new Error(data.error || "Failed to join room");
       }
 
-      // Save sessionToken to localStorage
+      // Save sessionToken and nickname to localStorage
       if (typeof window !== "undefined") {
         localStorage.setItem(`lovematch_token_${data.roomCode}`, data.sessionToken);
+        localStorage.setItem("lovematch_nickname", nickname.trim());
       }
 
       // Route straight to room
@@ -57,6 +78,8 @@ function JoinRoomContent() {
     }
   };
 
+  const isPreFilled = Boolean(initialCode);
+
   return (
     <div className="w-full max-w-md mx-auto px-4 sm:px-6 py-8 sm:py-16">
       <div className="glass-panel rounded-3xl p-6 sm:p-8 border border-pink-500/30 shadow-2xl">
@@ -65,10 +88,12 @@ function JoinRoomContent() {
             <LogIn className="w-6 h-6" />
           </div>
           <h1 className="text-2xl font-black text-white tracking-tight">
-            Join a Room
+            {isPreFilled ? "You're Invited to Play!" : "Join a Room"}
           </h1>
           <p className="text-xs text-pink-200/80 mt-1">
-            Enter the room code sent by your partner to play together.
+            {isPreFilled
+              ? "Your partner is waiting in this room. Enter your nickname to begin!"
+              : "Enter the room code sent by your partner to play together."}
           </p>
         </div>
 
@@ -79,8 +104,20 @@ function JoinRoomContent() {
           </div>
         )}
 
+        {isPreFilled && (
+          <div className="mb-5 p-3 rounded-2xl bg-emerald-500/15 border border-emerald-400/30 flex items-center justify-between text-xs font-semibold text-emerald-200">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+              <span>Room Code Detected</span>
+            </div>
+            <span className="font-mono font-black text-sm text-white tracking-wider">
+              #{initialCode}
+            </span>
+          </div>
+        )}
+
         <form onSubmit={handleJoin} className="space-y-5">
-          {/* Room Code */}
+          {/* Room Code (editable if not pre-filled or can be adjusted) */}
           <div>
             <label htmlFor="roomCode" className="block text-xs font-bold uppercase tracking-wider text-pink-300 mb-1.5">
               Room Code
@@ -90,9 +127,9 @@ function JoinRoomContent() {
                 id="roomCode"
                 type="text"
                 required
-                maxLength={8}
+                maxLength={10}
                 value={roomCode}
-                onChange={(e) => setRoomCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ""))}
+                onChange={(e) => setRoomCode(extractRoomCode(e.target.value))}
                 placeholder="e.g. HEART8"
                 className="w-full pl-10 pr-4 py-3.5 rounded-2xl glass-card border border-pink-500/30 focus:border-pink-500 focus:outline-none text-white text-base font-mono tracking-widest uppercase placeholder:font-sans placeholder:tracking-normal placeholder:text-pink-300/40"
               />

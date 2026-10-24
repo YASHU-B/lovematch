@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { GameStore } from "@/lib/db/store";
-import { sanitizeNickname } from "@/lib/tokens";
+import { sanitizeNickname, extractRoomCode } from "@/lib/tokens";
 
 const JoinRoomSchema = z.object({
   roomCode: z.string().min(4).max(10),
@@ -11,7 +11,13 @@ const JoinRoomSchema = z.object({
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const parsed = JoinRoomSchema.safeParse(body);
+    const rawCode = typeof body?.roomCode === "string" ? body.roomCode : "";
+    const cleanRoomCode = extractRoomCode(rawCode);
+
+    const parsed = JoinRoomSchema.safeParse({
+      roomCode: cleanRoomCode,
+      nickname: body?.nickname
+    });
 
     if (!parsed.success) {
       return NextResponse.json(

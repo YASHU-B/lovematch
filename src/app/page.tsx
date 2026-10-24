@@ -10,6 +10,7 @@ import {
   HelpCircle
 } from "lucide-react";
 import { CATEGORIES } from "@/lib/questions/data";
+import { PlayfulMascot } from "@/components/PlayfulMascot";
 
 export default function LandingPage() {
   const faqItems = [
@@ -36,22 +37,49 @@ export default function LandingPage() {
   ];
 
   return (
-    <div className="flex flex-col items-center w-full min-h-screen">
+    <div className="flex flex-col items-center w-full min-h-screen relative overflow-hidden">
+      {/* Floating Animated Badges / Stickers (Inspired by block.youtest.me) */}
+      <div className="hidden lg:block absolute top-28 left-8 animate-float pointer-events-none select-none z-10">
+        <div className="px-3 py-1.5 rounded-2xl bg-pink-500/20 backdrop-blur-md border border-pink-400/40 text-pink-300 text-xs font-black rotate-[-6deg] shadow-lg shadow-pink-500/20">
+          🙈 No Peeking!
+        </div>
+      </div>
+      <div className="hidden lg:block absolute top-40 right-10 animate-float pointer-events-none select-none z-10" style={{ animationDelay: "1.5s" }}>
+        <div className="px-3 py-1.5 rounded-2xl bg-purple-500/20 backdrop-blur-md border border-purple-400/40 text-purple-200 text-xs font-black rotate-[6deg] shadow-lg shadow-purple-500/20">
+          🔮 Mind Readers?
+        </div>
+      </div>
+      <div className="hidden lg:block absolute top-80 left-12 animate-float pointer-events-none select-none z-10" style={{ animationDelay: "2.5s" }}>
+        <div className="px-3 py-1.5 rounded-2xl bg-rose-500/20 backdrop-blur-md border border-rose-400/40 text-rose-200 text-xs font-black rotate-[-4deg] shadow-lg shadow-rose-500/20">
+          🍿 Plot Twist Incoming!
+        </div>
+      </div>
+      <div className="hidden lg:block absolute top-80 right-14 animate-float pointer-events-none select-none z-10" style={{ animationDelay: "3s" }}>
+        <div className="px-3 py-1.5 rounded-2xl bg-emerald-500/20 backdrop-blur-md border border-emerald-400/40 text-emerald-200 text-xs font-black rotate-[5deg] shadow-lg shadow-emerald-500/20">
+          ⚡ 100% Live Sync!
+        </div>
+      </div>
+
       {/* Hero Section */}
-      <section className="w-full relative px-4 sm:px-6 pt-10 sm:pt-16 pb-16 max-w-5xl mx-auto flex flex-col items-center text-center">
+      <section className="w-full relative px-4 sm:px-6 pt-6 sm:pt-10 pb-16 max-w-5xl mx-auto flex flex-col items-center text-center">
+        {/* Playful Interactive Mascot */}
+        <div className="mb-4">
+          <PlayfulMascot size="md" interactive={true} />
+        </div>
+
         {/* Subtle pill tag */}
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass-card border border-pink-500/40 text-pink-300 text-xs sm:text-sm font-semibold mb-6 animate-pulse-glow">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass-card border border-pink-500/40 text-pink-300 text-xs sm:text-sm font-semibold mb-5 animate-pulse-glow">
           <Sparkles className="w-4 h-4 text-pink-400" />
           <span>The #1 Couples & Friends Multiplayer Quiz</span>
         </div>
 
         {/* Main Headline */}
-        <h1 className="text-3xl sm:text-5xl md:text-6xl font-black tracking-tight leading-[1.15] max-w-3xl mb-5">
+        <h1 className="text-3xl sm:text-5xl md:text-6xl font-black tracking-tight leading-[1.15] max-w-3xl mb-4">
           How Well Do You <span className="text-gradient-romantic">Really Know</span> Your Person?
         </h1>
 
         {/* Supporting Text */}
-        <p className="text-base sm:text-lg md:text-xl text-pink-150/90 text-pink-200/90 max-w-2xl mb-8 leading-relaxed">
+        <p className="text-base sm:text-lg md:text-xl text-pink-200/90 max-w-2xl mb-8 leading-relaxed">
           Answer the questions privately. Reveal the truth together. Discover how in sync you really are.
         </p>
 

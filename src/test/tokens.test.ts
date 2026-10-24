@@ -4,7 +4,8 @@ import {
   generateSessionToken, 
   generateShareToken, 
   hashToken, 
-  sanitizeNickname 
+  sanitizeNickname,
+  extractRoomCode
 } from "../lib/tokens";
 
 describe("Security & Token Utilities", () => {
@@ -59,5 +60,14 @@ describe("Security & Token Utilities", () => {
     const longName = "A".repeat(40);
     const resultLong = sanitizeNickname(longName);
     expect(resultLong.nickname.length).toBeLessThanOrEqual(25);
+  });
+
+  it("extracts clean 6-character room codes even from messy WhatsApp strings or URLs", () => {
+    // Exact user case: WhatsApp text concatenated to code param
+    expect(extractRoomCode("MQ5VHD Join my LoveMatch quiz room with code MQ5VHD!")).toBe("MQ5VHD");
+    expect(extractRoomCode("MQ5VHD%20Join%20my%20LoveMatch%20quiz%20room%20with%20code%20MQ5VHD!")).toBe("MQ5VHD");
+    expect(extractRoomCode("  heArT8  ")).toBe("HEART8");
+    expect(extractRoomCode("https://love2match.vercel.app/join?code=MQ5VHD")).toBe("MQ5VHD");
+    expect(extractRoomCode("")).toBe("");
   });
 });
