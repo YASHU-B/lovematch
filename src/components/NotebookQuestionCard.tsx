@@ -23,23 +23,35 @@ interface NotebookQuestionCardProps {
   isCreatorMode?: boolean;
 }
 
-// Maps question keywords to cute thumbnail icons / badges for the left thumbnail box
+// Maps option text and emoji to thumbnail badges for the left thumbnail box
 function getOptionThumbnail(text: string, emoji: string, index: number) {
+  const bgs = [
+    { bg: "bg-amber-50", border: "border-amber-200" },
+    { bg: "bg-sky-50", border: "border-sky-200" },
+    { bg: "bg-pink-50", border: "border-pink-200" },
+    { bg: "bg-emerald-50", border: "border-emerald-200" }
+  ];
+
+  // If option text contains an emoji, use it directly for the thumbnail!
+  const emojiMatch = text.match(/(\p{Emoji_Presentation}|\p{Extended_Pictographic})/u);
+  if (emojiMatch) {
+    return { type: "emoji", value: emojiMatch[0], ...bgs[index % bgs.length] };
+  }
+
   const lower = text.toLowerCase();
-  
   if (lower.includes("shinchan")) return { type: "emoji", value: "🖍️", bg: "bg-red-50", border: "border-red-200" };
   if (lower.includes("doraemon")) return { type: "emoji", value: "🔔", bg: "bg-sky-50", border: "border-sky-200" };
   if (lower.includes("ninja") || lower.includes("hattori")) return { type: "emoji", value: "🥷", bg: "bg-indigo-50", border: "border-indigo-200" };
-  if (lower.includes("snack") || lower.includes("food") || lower.includes("burger") || lower.includes("biryani") || lower.includes("pizza") || lower.includes("fries")) {
+  if (lower.includes("food") || lower.includes("burger") || lower.includes("biryani") || lower.includes("pizza")) {
     return { type: "emoji", value: "🍔", bg: "bg-amber-50", border: "border-amber-200" };
   }
-  if (lower.includes("clothes") || lower.includes("shoes") || lower.includes("hoodie") || lower.includes("outfit")) {
+  if (lower.includes("clothes") || lower.includes("shoes")) {
     return { type: "emoji", value: "👟", bg: "bg-purple-50", border: "border-purple-200" };
   }
-  if (lower.includes("game") || lower.includes("gaming") || lower.includes("playstation")) {
+  if (lower.includes("game")) {
     return { type: "emoji", value: "🎮", bg: "bg-emerald-50", border: "border-emerald-200" };
   }
-  if (lower.includes("tech") || lower.includes("accessories") || lower.includes("phone") || lower.includes("gadget")) {
+  if (lower.includes("tech")) {
     return { type: "emoji", value: "⌚", bg: "bg-slate-100", border: "border-slate-300" };
   }
   if (lower.includes("reels") || lower.includes("tiktok") || lower.includes("doomscroll")) {
@@ -95,16 +107,23 @@ export function NotebookQuestionCard({
 
   // Format question text to highlight name dynamically with pink wavy underline
   const formattedQuestion = () => {
-    // Check if the question text already has the creator's name or placeholder "I" / "my"
-    if (questionText.toLowerCase().includes("my ") || questionText.toLowerCase().includes("i ")) {
-      // E.g. "What is my absolute favorite food?" -> "What's [name]'s absolute favorite food?"
-      const replaced = questionText
-        .replace(/^What is my\b/i, `What's ${displayName}'s`)
-        .replace(/^What do I\b/i, `What does ${displayName}`)
-        .replace(/\bmy\b/gi, `${displayName}'s`)
-        .replace(/\bI\b/g, displayName);
+    // Replace pronouns with displayName
+    const replaced = questionText
+      .replace(/^What is my\b/i, `What is ${displayName}'s`)
+      .replace(/^What's my\b/i, `What's ${displayName}'s`)
+      .replace(/^What do I\b/i, `What does ${displayName}`)
+      .replace(/^What are my\b/i, `What are ${displayName}'s`)
+      .replace(/^How do I\b/i, `How does ${displayName}`)
+      .replace(/^How fast do I\b/i, `How fast does ${displayName}`)
+      .replace(/^Why do I\b/i, `Why does ${displayName}`)
+      .replace(/^Can I\b/i, `Can ${displayName}`)
+      .replace(/^Am I\b/i, `Is ${displayName}`)
+      .replace(/^If you block me,\s*what will I do\?/i, `If you block ${displayName}, what will they do?`)
+      .replace(/\bmy\b/gi, `${displayName}'s`)
+      .replace(/\bme\b/gi, displayName)
+      .replace(/\bI\b/g, displayName);
 
-      // Split around displayName to style it
+    if (replaced.toLowerCase().includes(displayName.toLowerCase())) {
       const parts = replaced.split(new RegExp(`(${displayName}(?:'s)?)`, "i"));
       return (
         <span>

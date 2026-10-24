@@ -2,11 +2,15 @@
 
 import React, { useState, useEffect, use, Suspense } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { 
   ArrowRight, 
   Loader2, 
   AlertCircle, 
-  ArrowLeft 
+  ArrowLeft,
+  Trophy,
+  ExternalLink,
+  Users
 } from "lucide-react";
 import { soundEffects } from "@/components/AudioEffects";
 import { NotebookQuestionCard } from "@/components/NotebookQuestionCard";
@@ -25,6 +29,23 @@ interface QuizData {
   questions: QuizQuestion[];
 }
 
+interface LeaderboardAttempt {
+  id: string;
+  friendName: string;
+  score: number;
+  total: number;
+  percentage: number;
+  verdict: "safe" | "warning" | "blocked";
+  createdAt: string;
+}
+
+interface LeaderboardData {
+  attempts: LeaderboardAttempt[];
+  totalPlayers: number;
+  safeCount: number;
+  blockedCount: number;
+}
+
 function QuizTakingContent({
   params
 }: {
@@ -36,6 +57,7 @@ function QuizTakingContent({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [quiz, setQuiz] = useState<QuizData | null>(null);
+  const [leaderboard, setLeaderboard] = useState<LeaderboardData | null>(null);
 
   // Friend state
   const [friendName, setFriendName] = useState("");
@@ -45,14 +67,30 @@ function QuizTakingContent({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    async function loadQuiz() {
+    async function loadQuizAndScores() {
       try {
-        const res = await fetch(`/api/quiz/${id}`);
-        const data = await res.json();
-        if (!res.ok || data.error) {
-          throw new Error(data.error || "Quiz not found or expired");
+        const [quizRes, scoresRes] = await Promise.all([
+          fetch(`/api/quiz/${id}`),
+          fetch(`/api/quiz/${id}/scores`)
+        ]);
+
+        const quizData = await quizRes.json();
+        if (!quizRes.ok || quizData.error) {
+          throw new Error(quizData.error || "Quiz not found or expired");
         }
-        setQuiz(data.quiz);
+        setQuiz(quizData.quiz);
+
+        if (scoresRes.ok) {
+          const scoresData = await scoresRes.json();
+          if (scoresData.success) {
+            setLeaderboard({
+              attempts: scoresData.attempts || [],
+              totalPlayers: scoresData.totalPlayers || 0,
+              safeCount: scoresData.safeCount || 0,
+              blockedCount: scoresData.blockedCount || 0
+            });
+          }
+        }
 
         if (typeof window !== "undefined") {
           const saved = localStorage.getItem("lovematch_nickname");
@@ -64,7 +102,7 @@ function QuizTakingContent({
         setLoading(false);
       }
     }
-    loadQuiz();
+    loadQuizAndScores();
   }, [id]);
 
   if (loading) {
@@ -159,58 +197,162 @@ function QuizTakingContent({
   return (
     <div className="w-full max-w-lg mx-auto px-4 py-6">
       {!hasStarted ? (
-        /* Welcome / Name Screen */
-        <div className="bg-white border-3 border-slate-900 rounded-3xl p-6 sm:p-8 shadow-[0_8px_0_#1E293B] text-center">
-          {/* Mascot Welcome Duo */}
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <KawaiiBear size="md" mood="cute" />
-            <KawaiiPanda size="md" mood="happy" />
-          </div>
-
-          <span className="text-xs font-black uppercase tracking-wider text-pink-600 block mb-1">
-            Friendship Test
-          </span>
-          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mb-2">
-            How Well Do You Know{" "}
-            <span className="text-pink-600 relative inline-block">
-              {quiz.creatorName}
-              <WavyUnderline color="pink" className="absolute -bottom-1 left-0 w-full h-2" />
-            </span>
-            ?
-          </h1>
-          <p className="text-xs sm:text-sm font-bold text-slate-600 mb-6">
-            Answer {totalCount} questions. Get a high score to prove you&apos;re a real bestie... or get <span className="text-rose-600 font-black">BLOCKED! 🚫</span>
-          </p>
-
-          <form onSubmit={handleStart} className="space-y-4 text-left">
-            <div>
-              <label className="block text-xs font-black uppercase text-slate-500 mb-1">
-                Your Nickname
-              </label>
-              <input
-                type="text"
-                required
-                maxLength={20}
-                value={friendName}
-                onChange={(e) => setFriendName(e.target.value)}
-                placeholder="e.g. Maya or Chris"
-                className="w-full px-4 py-3.5 rounded-2xl bg-sky-50 border-2 border-slate-900 font-bold text-base text-slate-900 focus:bg-white focus:outline-none shadow-inner"
-              />
+        /* Welcome / Name Screen + Live Leaderboard */
+        <div className="space-y-6">
+          <div className="bg-white border-3 border-slate-900 rounded-3xl p-6 sm:p-8 shadow-[0_8px_0_#1E293B] text-center">
+            {/* Mascot Welcome Duo */}
+            <div className="flex items-center justify-center gap-3 mb-4">
+              <KawaiiBear size="md" mood="cute" />
+              <KawaiiPanda size="md" mood="happy" />
             </div>
 
-            <button
-              type="submit"
-              disabled={!friendName.trim()}
-              className="w-full py-4 rounded-2xl bg-yellow-400 hover:bg-yellow-300 disabled:opacity-50 border-2.5 border-slate-900 text-slate-900 font-black text-base shadow-[0_5px_0_#CA8A04] active:translate-y-1 active:shadow-none transition-all flex items-center justify-center gap-2"
-            >
-              <span>Start Guessing! 🚀</span>
-              <ArrowRight className="w-5 h-5" />
-            </button>
-          </form>
+            <span className="text-xs font-black uppercase tracking-wider text-pink-600 block mb-1">
+              Friendship Test
+            </span>
+            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mb-2">
+              How Well Do You Know{" "}
+              <span className="text-pink-600 relative inline-block">
+                {quiz.creatorName}
+                <WavyUnderline color="pink" className="absolute -bottom-1 left-0 w-full h-2" />
+              </span>
+              ?
+            </h1>
+            <p className="text-xs sm:text-sm font-bold text-slate-600 mb-6">
+              Answer {totalCount} questions. Get a high score to prove you&apos;re a real bestie... or get <span className="text-rose-600 font-black">BLOCKED! 🚫</span>
+            </p>
 
-          <p className="text-[11px] font-bold text-slate-400 mt-4">
-            {quiz.creatorName} will see your score on their private scoreboard!
-          </p>
+            <form onSubmit={handleStart} className="space-y-4 text-left">
+              <div>
+                <label className="block text-xs font-black uppercase text-slate-500 mb-1">
+                  Your Nickname
+                </label>
+                <input
+                  type="text"
+                  required
+                  maxLength={20}
+                  value={friendName}
+                  onChange={(e) => setFriendName(e.target.value)}
+                  placeholder="e.g. Maya or Chris"
+                  className="w-full px-4 py-3.5 rounded-2xl bg-sky-50 border-2 border-slate-900 font-bold text-base text-slate-900 focus:bg-white focus:outline-none shadow-inner"
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={!friendName.trim()}
+                className="w-full py-4 rounded-2xl bg-yellow-400 hover:bg-yellow-300 disabled:opacity-50 border-2.5 border-slate-900 text-slate-900 font-black text-base shadow-[0_5px_0_#CA8A04] active:translate-y-1 active:shadow-none transition-all flex items-center justify-center gap-2"
+              >
+                <span>Start Guessing! 🚀</span>
+                <ArrowRight className="w-5 h-5" />
+              </button>
+            </form>
+
+            <p className="text-[11px] font-bold text-slate-400 mt-4">
+              {quiz.creatorName} will see your score on the live scoreboard!
+            </p>
+          </div>
+
+          {/* Live Leaderboard / Hall of Fame Card directly on the Join Screen */}
+          <div className="bg-white border-3 border-slate-900 rounded-3xl p-6 sm:p-7 shadow-[0_8px_0_#1E293B]">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2.5">
+                <div className="w-10 h-10 rounded-2xl bg-yellow-300 border-2 border-slate-900 flex items-center justify-center text-xl shadow-[0_2px_0_#1E293B]">
+                  🏆
+                </div>
+                <div>
+                  <h2 className="text-lg font-black text-slate-900 leading-tight">
+                    Live Scoreboard
+                  </h2>
+                  <p className="text-xs font-bold text-slate-500 flex items-center gap-1">
+                    <Users className="w-3.5 h-3.5 text-sky-600" />
+                    <span>{leaderboard?.totalPlayers || 0} friends played</span>
+                  </p>
+                </div>
+              </div>
+
+              <Link
+                href={`/quiz/${id}/scores`}
+                className="text-xs font-black text-sky-600 hover:text-sky-700 flex items-center gap-1 bg-sky-50 px-3 py-1.5 rounded-xl border border-sky-200 shadow-xs"
+              >
+                <span>Full Board</span>
+                <ExternalLink className="w-3 h-3" />
+              </Link>
+            </div>
+
+            {/* Quick Stats: Safe vs Blocked */}
+            <div className="grid grid-cols-2 gap-2.5 mb-4">
+              <div className="p-2.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-center">
+                <span className="text-xs font-black text-emerald-700">
+                  😇 {leaderboard?.safeCount || 0} Safe
+                </span>
+              </div>
+              <div className="p-2.5 rounded-2xl bg-rose-50 border border-rose-200 text-center">
+                <span className="text-xs font-black text-rose-700">
+                  🚫 {leaderboard?.blockedCount || 0} Blocked
+                </span>
+              </div>
+            </div>
+
+            {/* Top Players List */}
+            {leaderboard && leaderboard.attempts.length > 0 ? (
+              <div className="space-y-2.5">
+                {leaderboard.attempts.slice(0, 5).map((att, i) => {
+                  const isTop1 = i === 0;
+                  const isTop2 = i === 1;
+                  const isTop3 = i === 2;
+                  const isBlocked = att.verdict === "blocked";
+
+                  return (
+                    <div
+                      key={att.id}
+                      className={`p-3 rounded-2xl border-2 flex items-center justify-between gap-3 ${
+                        isTop1
+                          ? "bg-amber-50 border-amber-300 shadow-[0_2px_0_#F59E0B]"
+                          : "bg-slate-50 border-slate-200"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <span className="w-6 text-center font-black text-sm text-slate-700 shrink-0">
+                          {isTop1 ? "🥇" : isTop2 ? "🥈" : isTop3 ? "🥉" : `#${i + 1}`}
+                        </span>
+                        <span className="font-extrabold text-slate-900 text-sm truncate">
+                          {att.friendName}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className="text-xs font-black text-slate-800">
+                          {att.score}/{att.total}
+                        </span>
+                        <span
+                          className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full border ${
+                            isBlocked
+                              ? "bg-rose-100 text-rose-700 border-rose-300"
+                              : "bg-emerald-100 text-emerald-800 border-emerald-300"
+                          }`}
+                        >
+                          {isBlocked ? "Blocked 🚫" : "Safe 💖"}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+
+                {leaderboard.attempts.length > 5 && (
+                  <p className="text-center text-xs font-bold text-slate-400 pt-1">
+                    + {leaderboard.attempts.length - 5} more friends on the scoreboard
+                  </p>
+                )}
+              </div>
+            ) : (
+              <div className="p-4 rounded-2xl bg-sky-50 border border-sky-200 text-center">
+                <Trophy className="w-6 h-6 text-yellow-500 mx-auto mb-1" />
+                <p className="text-xs font-bold text-sky-800">
+                  No one has played yet! Be the very first friend to take the quiz and rank #1 🥇
+                </p>
+              </div>
+            )}
+          </div>
         </div>
       ) : (
         /* Quiz Question Screen with NotebookQuestionCard */
