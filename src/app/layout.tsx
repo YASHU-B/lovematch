@@ -1,8 +1,23 @@
 import type { Metadata, Viewport } from "next";
+import { Fredoka, Nunito } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { KawaiiSkyBackground } from "@/components/KawaiiSkyBackground";
+
+const fredoka = Fredoka({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-fredoka",
+  display: "swap"
+});
+
+const nunito = Nunito({
+  subsets: ["latin"],
+  weight: ["400", "600", "700", "800", "900"],
+  variable: "--font-nunito",
+  display: "swap"
+});
 
 export const metadata: Metadata = {
   title: "Don't Block Me — Find Your Fake Friends | LoveMatch Quiz",
@@ -41,8 +56,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="h-full antialiased">
-      <body className="min-h-full flex flex-col bg-[#8AC0EF] text-[#1E293B] selection:bg-pink-400 selection:text-white">
+    <html lang="en" className={`${fredoka.variable} ${nunito.variable} h-full antialiased`}>
+      <body className="min-h-full flex flex-col bg-[#8AC0EF] text-[#1E293B] selection:bg-pink-400 selection:text-white font-sans">
         <KawaiiSkyBackground />
         <Navbar />
         <main className="flex-1 flex flex-col relative z-10 w-full">
