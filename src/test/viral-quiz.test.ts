@@ -35,6 +35,9 @@ describe("Don't Block Me — Viral Quiz & Leaderboard System", () => {
     expect(secretToken).toBeDefined();
     expect(quiz.creatorName).toBe("Sarah");
     expect(quiz.questions).toHaveLength(3);
+    expect(
+      new Date(quiz.expiresAt).getTime() - new Date(quiz.createdAt).getTime()
+    ).toBeCloseTo(14 * 24 * 60 * 60 * 1000, -3); // Exactly 2 weeks
 
     // 2. Fetch public quiz as friend (correctAnswer must NOT be leaked!)
     const publicQuiz = await GameStore.getViralQuiz(id);

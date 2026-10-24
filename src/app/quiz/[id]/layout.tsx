@@ -12,23 +12,23 @@ export async function generateMetadata({
     const name = quiz?.creatorName?.trim() || "your friend";
 
     return {
-      title: `How well do you know ${name}? - Don't Block Me`,
+      title: `How well do you know ${name}? - Don't Block Me 2`,
       description: `Dare for you! Can you answer 10 questions about ${name} without getting BLOCKED? Take ${name}'s friendship test now! 🚫`,
       openGraph: {
-        title: `How well do you know ${name}? - Don't Block Me`,
+        title: `How well do you know ${name}? - Don't Block Me 2`,
         description: `Can you score 10/10 on ${name}'s quiz without getting BLOCKED? Prove you're a real friend! 💖🚫`,
-        siteName: "Don't Block Me",
+        siteName: "Don't Block Me 2",
         type: "website"
       },
       twitter: {
         card: "summary_large_image",
-        title: `How well do you know ${name}? - Don't Block Me`,
+        title: `How well do you know ${name}? - Don't Block Me 2`,
         description: `Can you score 10/10 on ${name}'s quiz without getting BLOCKED? Prove you're a real friend! 💖🚫`
       }
     };
   } catch {
     return {
-      title: "How well do you know your friend? - Don't Block Me",
+      title: "How well do you know your friend? - Don't Block Me 2",
       description: "Answer 10 questions to prove you're a real friend and stay off the block list! 🚫"
     };
   }

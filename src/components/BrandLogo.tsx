@@ -33,7 +33,7 @@ export function BrandLogo({ size = "md", withSubtitle = false, href = "/" }: Bra
       <div className="flex flex-col leading-tight">
         <div className="flex items-center gap-1.5">
           <span className={`font-black tracking-tight text-slate-900 ${textSizes[size]}`}>
-            Don&apos;t Block <span className="text-pink-500">Me</span>
+            Don&apos;t Block <span className="text-pink-500">Me 2</span>
           </span>
           <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-yellow-300 text-slate-900 border border-slate-900 shadow-[0_1.5px_0_#1E293B]">
             Quiz

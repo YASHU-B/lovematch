@@ -144,7 +144,7 @@ function CreateQuizContent() {
     if (typeof window !== "undefined") {
       return `${window.location.origin}/quiz/${createdQuiz.quizId}`;
     }
-    return `https://love2match.vercel.app/quiz/${createdQuiz.quizId}`;
+    return `https://dontblockme2.vercel.app/quiz/${createdQuiz.quizId}`;
   };
 
   const handleWhatsAppShare = () => {
@@ -152,7 +152,7 @@ function CreateQuizContent() {
     const url = getPublicQuizUrl();
     const name = creatorName.trim() || "me";
     const text = encodeURIComponent(
-      `*How well do you know ${name}?* 🙈\n\nDare for you! Can you answer 10 questions about me without getting BLOCKED? 🚫💀\n\nTake the "Don't Block Me" test here 👇\n${url}`
+      `*How well do you know ${name}?* 🙈\n\nDare for you! Can you answer 10 questions about me without getting BLOCKED? 🚫💀\n\nTake the "Don't Block Me 2" test here 👇\n${url}`
     );
     window.open(`https://api.whatsapp.com/send?text=${text}`, "_blank");
   };

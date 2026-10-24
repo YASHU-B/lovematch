@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS public.viral_quizzes (
   secret_token VARCHAR(64) NOT NULL,
   questions JSONB NOT NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now()),
-  expires_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now() + interval '30 days')
+  expires_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now() + interval '14 days')
 );
 
 -- 2. Viral Quiz Attempts / Friend Scores table

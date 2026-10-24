@@ -11,7 +11,7 @@ export default function PrivacyPage() {
         className="inline-flex items-center gap-1.5 text-xs font-black text-slate-800 hover:text-pink-600 mb-6 bg-white/80 px-3.5 py-1.5 rounded-full border border-slate-900 shadow-xs transition-colors"
       >
         <ArrowLeft className="w-4 h-4" />
-        <span>Back to Don&apos;t Block Me</span>
+        <span>Back to Don&apos;t Block Me 2</span>
       </Link>
 
       <div className="bg-white border-3 border-slate-900 rounded-3xl p-6 sm:p-10 shadow-[0_8px_0_#1E293B] space-y-8 select-none">
@@ -107,7 +107,7 @@ export default function PrivacyPage() {
         </section>
 
         <div className="pt-4 border-t-2 border-slate-100 text-xs font-bold text-slate-500">
-          Have privacy questions? Reach out to us at <span className="text-slate-900 font-black">privacy@dontblockme.app</span>.
+          Have privacy questions? Reach out to us at <span className="text-slate-900 font-black">privacy@dontblockme2.app</span>.
         </div>
       </div>
     </div>

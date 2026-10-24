@@ -48,7 +48,7 @@ export class GameStore {
       secretToken,
       questions: params.questions,
       createdAt: new Date().toISOString(),
-      expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() // 30 days
+      expiresAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString() // 2 weeks (14 days)
     };
 
     // Store in-memory
@@ -119,6 +119,11 @@ export class GameStore {
 
     if (!quiz) return null;
 
+    // Check if 2 weeks have passed since quiz creation
+    if (new Date(quiz.expiresAt).getTime() < Date.now()) {
+      return null;
+    }
+
     const isCreator = Boolean(secretToken && quiz.secretToken === secretToken);
 
     return {
@@ -172,6 +177,10 @@ export class GameStore {
 
     if (!quiz) {
       throw new Error("Quiz not found or expired");
+    }
+
+    if (new Date(quiz.expiresAt).getTime() < Date.now()) {
+      throw new Error("This quiz link has expired after 2 weeks.");
     }
 
     const questionMap = new Map(quiz.questions.map(q => [q.id, q]));

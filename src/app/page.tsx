@@ -53,7 +53,7 @@ export default function LandingPage() {
       {/* Floating Animated Badges / Stickers (block.youtest.me style) */}
       <div className="hidden lg:block absolute top-28 left-8 animate-float-sticker pointer-events-none select-none z-10" style={{ "--rot": "-6deg" } as React.CSSProperties}>
         <div className="px-3.5 py-1.5 rounded-2xl bg-yellow-300 border-2 border-slate-900 text-slate-900 text-xs font-black shadow-[0_3px_0_#1E293B]">
-          🙈 Don&apos;t Block Me!
+          🙈 Don&apos;t Block Me 2!
         </div>
       </div>
       <div className="hidden lg:block absolute top-40 right-10 animate-float-sticker pointer-events-none select-none z-10" style={{ "--rot": "6deg", animationDelay: "1.2s" } as React.CSSProperties}>
@@ -82,7 +82,7 @@ export default function LandingPage() {
         {/* Pill Tag */}
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border-2 border-slate-900 text-slate-800 text-xs sm:text-sm font-black mb-4 shadow-[0_3px_0_#1E293B]">
           <Sparkles className="w-4 h-4 text-yellow-500 fill-yellow-400" />
-          <span>The Viral &quot;Don&apos;t Block Me&quot; Friendship Quiz</span>
+          <span>The Viral &quot;Don&apos;t Block Me 2&quot; Friendship Quiz</span>
         </div>
 
         {/* Main Title */}

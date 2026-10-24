@@ -20,20 +20,22 @@ const nunito = Nunito({
 });
 
 export const metadata: Metadata = {
-  title: "Find Friends you can't trust - Don't Block Me",
-  description: "Find friends you shouldn't trust with Don't Block Me. Create your quiz and find friends who you can't trust!",
-  keywords: ["dont block me", "find friends you cant trust", "fake friends quiz", "block you test me", "who knows me best"],
-  authors: [{ name: "Don't Block Me" }],
+  metadataBase: new URL("https://dontblockme2.vercel.app"),
+  title: "Find Friends you can't trust - Don't Block Me 2",
+  description: "Find friends you shouldn't trust with Don't Block Me 2. Create your quiz and find friends who you can't trust!",
+  keywords: ["dontblockme2", "dont block me 2", "find friends you cant trust", "fake friends quiz", "block you test me", "who knows me best"],
+  authors: [{ name: "Don't Block Me 2" }],
   openGraph: {
-    title: "Find Friends you can't trust - Don't Block Me",
-    description: "Find friends you shouldn't trust with Don't Block Me. Create your quiz and find friends who you can't trust!",
-    siteName: "Don't Block Me",
+    title: "Find Friends you can't trust - Don't Block Me 2",
+    description: "Find friends you shouldn't trust with Don't Block Me 2. Create your quiz and find friends who you can't trust!",
+    url: "https://dontblockme2.vercel.app",
+    siteName: "Don't Block Me 2",
     locale: "en_US",
     type: "website"
   },
   twitter: {
     card: "summary_large_image",
-    title: "Find Friends you can't trust - Don't Block Me",
+    title: "Find Friends you can't trust - Don't Block Me 2",
     description: "Create your quiz and find friends who you can't trust!"
   },
   icons: {

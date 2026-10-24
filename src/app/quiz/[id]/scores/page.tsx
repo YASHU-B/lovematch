@@ -92,7 +92,7 @@ function ScoreboardContent({
   const attempts = data?.attempts || [];
   const creatorName = data?.creatorName || "Friend";
   const isCreator = Boolean(data?.isCreator);
-  const publicUrl = typeof window !== "undefined" ? `${window.location.origin}/quiz/${id}` : `https://love2match.vercel.app/quiz/${id}`;
+  const publicUrl = typeof window !== "undefined" ? `${window.location.origin}/quiz/${id}` : `https://dontblockme2.vercel.app/quiz/${id}`;
 
   const handleWhatsAppShare = () => {
     soundEffects.playPop();
