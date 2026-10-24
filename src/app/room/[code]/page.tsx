@@ -194,6 +194,43 @@ function RoomContent({
     setTimeout(() => setCopiedCode(false), 2500);
   };
 
+  const [joinNickname, setJoinNickname] = useState("");
+  const [isJoining, setIsJoining] = useState(false);
+  const [joinError, setJoinError] = useState<string | null>(null);
+
+  const handleInlineJoin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!joinNickname.trim()) return;
+
+    setIsJoining(true);
+    setJoinError(null);
+
+    try {
+      const res = await fetch("/api/rooms/join", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          roomCode,
+          nickname: joinNickname.trim()
+        })
+      });
+
+      const data = await res.json();
+      if (!res.ok || data.error) {
+        throw new Error(data.error || "Failed to join room");
+      }
+
+      if (typeof window !== "undefined") {
+        localStorage.setItem(`lovematch_token_${roomCode}`, data.sessionToken);
+      }
+
+      window.location.reload();
+    } catch (err: unknown) {
+      setJoinError(err instanceof Error ? err.message : "Failed to join room");
+      setIsJoining(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-3">
@@ -204,6 +241,67 @@ function RoomContent({
   }
 
   if (error && !state) {
+    const isAuthRequired =
+      error.toLowerCase().includes("session") ||
+      error.toLowerCase().includes("unauthorized") ||
+      error.toLowerCase().includes("authentication");
+
+    if (isAuthRequired) {
+      return (
+        <div className="max-w-md mx-auto px-4 py-16 text-center">
+          <div className="glass-panel rounded-3xl p-6 sm:p-8 border-2 border-pink-500/40 shadow-2xl">
+            <div className="w-14 h-14 mx-auto rounded-2xl bg-pink-500/20 border border-pink-500/30 flex items-center justify-center text-pink-400 mb-4 animate-pulse">
+              <Heart className="w-7 h-7 fill-pink-500/30" />
+            </div>
+            <span className="text-xs font-bold uppercase tracking-wider text-pink-400 block mb-1">
+              You&apos;re Invited!
+            </span>
+            <h2 className="text-2xl font-black text-white tracking-tight mb-2">
+              Join Room #{roomCode}
+            </h2>
+            <p className="text-xs text-pink-200/80 mb-6">
+              Enter your nickname below to join your partner and start playing immediately:
+            </p>
+
+            {joinError && (
+              <div className="mb-4 p-3 rounded-xl bg-rose-500/20 border border-rose-500/40 text-rose-200 text-xs">
+                {joinError}
+              </div>
+            )}
+
+            <form onSubmit={handleInlineJoin} className="space-y-4">
+              <input
+                type="text"
+                required
+                maxLength={25}
+                value={joinNickname}
+                onChange={(e) => setJoinNickname(e.target.value)}
+                placeholder="e.g. Honey, Rohan, Bestie"
+                className="w-full px-4 py-3.5 rounded-2xl glass-card border border-pink-500/30 text-white text-sm focus:border-pink-500 focus:outline-none placeholder:text-pink-300/40"
+              />
+              <button
+                type="submit"
+                disabled={isJoining}
+                className="w-full min-touch-target flex items-center justify-center gap-2 py-4 rounded-2xl bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 text-white font-extrabold text-base shadow-xl shadow-pink-500/35 transition-transform active:scale-95 disabled:opacity-50"
+              >
+                {isJoining ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Joining Room...</span>
+                  </>
+                ) : (
+                  <>
+                    <Heart className="w-4 h-4 fill-white" />
+                    <span>Enter Room & Start</span>
+                  </>
+                )}
+              </button>
+            </form>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="max-w-md mx-auto px-4 py-16 text-center">
         <div className="glass-panel rounded-3xl p-8 border border-pink-500/30">

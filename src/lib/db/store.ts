@@ -84,16 +84,38 @@ export class GameStore {
 
     roomsStore.set(rawCode.toUpperCase(), room);
     roomsStore.set(roomId, room);
+    roomsStore.set(room.shareToken, room);
 
     return { room, hostPlayer, sessionToken };
   }
 
   /**
-   * Finds room by room code or ID.
+   * Finds room by room code, room ID, or share token.
    */
-  static async findRoom(codeOrId: string): Promise<Room | null> {
-    const key = codeOrId.trim().toUpperCase();
-    const room = roomsStore.get(key) || roomsStore.get(codeOrId);
+  static async findRoom(codeOrIdOrToken: string): Promise<Room | null> {
+    if (!codeOrIdOrToken) return null;
+    const clean = codeOrIdOrToken.trim();
+    const upperKey = clean.toUpperCase();
+
+    // 1. Direct key lookups
+    let room = roomsStore.get(upperKey) || roomsStore.get(clean);
+
+    // 2. Scan fallback across all rooms
+    if (!room) {
+      for (const r of roomsStore.values()) {
+        if (
+          r.code === upperKey ||
+          r.code.toUpperCase() === upperKey ||
+          r.id === clean ||
+          r.shareToken === clean ||
+          r.shareToken.toLowerCase() === clean.toLowerCase()
+        ) {
+          room = r;
+          break;
+        }
+      }
+    }
+
     if (!room) return null;
 
     // Check expiration

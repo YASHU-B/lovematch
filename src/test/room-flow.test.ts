@@ -87,4 +87,20 @@ describe("Room Flow & Private Reveal Gameplay", () => {
     expect(round2.subjectPlayerId).toBe(guestPlayer.id);
     expect(round2.guesserPlayerId).toBe(hostPlayer.id);
   });
+
+  it("finds room by invitation shareToken reliably", async () => {
+    const { room } = await GameStore.createRoom({
+      nickname: "Alex",
+      categoryId: "romantic-moments",
+      questionCount: 5
+    });
+
+    expect(room.shareToken).toBeDefined();
+
+    // Verify findRoom can locate the room using the share token
+    const foundRoom = await GameStore.findRoom(room.shareToken);
+    expect(foundRoom).not.toBeNull();
+    expect(foundRoom?.id).toBe(room.id);
+    expect(foundRoom?.code).toBe(room.code);
+  });
 });

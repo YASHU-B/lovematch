@@ -37,6 +37,15 @@ function ChallengeContent({
           throw new Error(data.error || "Invitation expired or invalid");
         }
         setChallenge(data.challenge);
+
+        // If this device already has an active session token for this room, jump straight in
+        if (typeof window !== "undefined" && data.challenge?.roomCode) {
+          const existing = localStorage.getItem(`lovematch_token_${data.challenge.roomCode}`);
+          if (existing) {
+            router.push(`/room/${data.challenge.roomCode}`);
+            return;
+          }
+        }
       } catch (err: unknown) {
         setError(err instanceof Error ? err.message : "Failed to load invitation");
       } finally {
@@ -44,7 +53,7 @@ function ChallengeContent({
       }
     }
     loadPreview();
-  }, [token]);
+  }, [token, router]);
 
   const handleAccept = async (e: React.FormEvent) => {
     e.preventDefault();
