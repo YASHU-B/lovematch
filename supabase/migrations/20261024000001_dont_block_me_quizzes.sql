@@ -11,6 +11,10 @@ CREATE TABLE IF NOT EXISTS public.viral_quizzes (
   expires_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now() + interval '14 days')
 );
 
+-- Ensure column exists if table was created in an earlier migration
+ALTER TABLE public.viral_quizzes 
+  ADD COLUMN IF NOT EXISTS expires_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now() + interval '14 days');
+
 -- 2. Viral Quiz Attempts / Friend Scores table
 CREATE TABLE IF NOT EXISTS public.viral_quiz_attempts (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
