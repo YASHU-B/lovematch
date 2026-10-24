@@ -140,7 +140,7 @@ export default function AdminDashboardPage() {
 
           {authError && (
             <div className="mb-4 p-3 rounded-xl bg-rose-50 border-2 border-rose-300 text-rose-700 text-xs font-bold">
-              {authError} (Hint: default is admin2026)
+              {authError}
             </div>
           )}
 

@@ -150,8 +150,9 @@ function CreateQuizContent() {
   const handleWhatsAppShare = () => {
     soundEffects.playPop();
     const url = getPublicQuizUrl();
+    const name = creatorName.trim() || "me";
     const text = encodeURIComponent(
-      `Can you answer 10 questions about me without getting BLOCKED? 🚫💀\n\nTake my "Don't Block Me" test here:\n${url}`
+      `*How well do you know ${name}?* 🙈\n\nDare for you! Can you answer 10 questions about me without getting BLOCKED? 🚫💀\n\nTake the "Don't Block Me" test here 👇\n${url}`
     );
     window.open(`https://api.whatsapp.com/send?text=${text}`, "_blank");
   };

@@ -97,7 +97,7 @@ function ScoreboardContent({
   const handleWhatsAppShare = () => {
     soundEffects.playPop();
     const text = encodeURIComponent(
-      `Take ${creatorName}'s "Don't Block Me" test! See where you rank on the live leaderboard 🏆:\n${publicUrl}`
+      `*How well do you know ${creatorName}?* 🙈\n\nCan you score 10/10 without getting BLOCKED? 🚫\nCheck out the live scoreboard and take the test here 👇\n${publicUrl}`
     );
     window.open(`https://api.whatsapp.com/send?text=${text}`, "_blank");
   };

@@ -20,25 +20,29 @@ const nunito = Nunito({
 });
 
 export const metadata: Metadata = {
-  title: "Don't Block Me — Find Your Fake Friends | LoveMatch Quiz",
-  description: "Find friends you can't trust with Don't Block Me! Create your quiz, test your friends, reveal fake friends, and see who gets blocked!",
-  keywords: ["dont block me", "fake friends quiz", "block you test me", "who knows me best", "friendship quiz", "love match"],
-  authors: [{ name: "YouTest / LoveMatch" }],
+  title: "Find Friends you can't trust - Don't Block Me",
+  description: "Find friends you shouldn't trust with Don't Block Me. Create your quiz and find friends who you can't trust!",
+  keywords: ["dont block me", "find friends you cant trust", "fake friends quiz", "block you test me", "who knows me best"],
+  authors: [{ name: "Don't Block Me" }],
   openGraph: {
-    title: "Find Friends you can't trust — Don't Block Me",
-    description: "Create your quiz and find friends who you can't trust!",
-    url: "https://love2match.vercel.app",
+    title: "Find Friends you can't trust - Don't Block Me",
+    description: "Find friends you shouldn't trust with Don't Block Me. Create your quiz and find friends who you can't trust!",
     siteName: "Don't Block Me",
     locale: "en_US",
     type: "website"
   },
   twitter: {
     card: "summary_large_image",
-    title: "Don't Block Me — Find Your Fake Friends",
-    description: "Create your custom test, share on WhatsApp/Snapchat, and see who gets blocked!"
+    title: "Find Friends you can't trust - Don't Block Me",
+    description: "Create your quiz and find friends who you can't trust!"
   },
   icons: {
-    icon: "/favicon.ico"
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/favicon.ico", sizes: "any" }
+    ],
+    apple: "/apple-icon.svg",
+    shortcut: "/favicon.svg"
   }
 };
 

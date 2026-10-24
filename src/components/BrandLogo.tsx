@@ -1,5 +1,6 @@
 import React from "react";
 import Link from "next/link";
+import { KawaiiBear } from "./KawaiiCharacters";
 
 interface BrandLogoProps {
   size?: "sm" | "md" | "lg";
@@ -23,11 +24,9 @@ export function BrandLogo({ size = "md", withSubtitle = false, href = "/" }: Bra
   const content = (
     <div className="inline-flex items-center gap-2.5 group cursor-pointer select-none">
       <div className={`relative flex items-center justify-center ${iconSizes[size]} transition-transform group-hover:scale-105 active:scale-95`}>
-        {/* Kawaii Cloud + Heart Mascot Badge */}
-        <div className="w-full h-full rounded-2xl bg-white border-2 border-slate-800 shadow-[0_3px_0_#1E293B] flex items-center justify-center overflow-hidden">
-          <span className="text-xl select-none" role="img" aria-label="Cute angel mascot">
-            😇
-          </span>
+        {/* Kawaii Bear Mascot Badge */}
+        <div className="w-full h-full rounded-2xl bg-amber-100 border-2 border-slate-900 shadow-[0_3px_0_#1E293B] flex items-center justify-center overflow-hidden p-1">
+          <KawaiiBear size="sm" mood="cute" className="w-full h-full" />
         </div>
       </div>
 

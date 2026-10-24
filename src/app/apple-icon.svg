@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="128" y2="128" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#8AC0EF"/>
+      <stop offset="1" stop-color="#60A5FA"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Sky blue rounded background -->
+  <rect width="128" height="128" rx="28" fill="url(#bg)" />
+
+  <!-- Left Ear -->
+  <circle cx="38" cy="38" r="16" fill="#C68958" stroke="#25140A" stroke-width="3.5"/>
+  <circle cx="38" cy="38" r="9" fill="#F4B785"/>
+
+  <!-- Right Ear -->
+  <circle cx="90" cy="38" r="16" fill="#C68958" stroke="#25140A" stroke-width="3.5"/>
+  <circle cx="90" cy="38" r="9" fill="#F4B785"/>
+
+  <!-- Head -->
+  <rect x="24" y="32" width="80" height="72" rx="36" fill="#D69766" stroke="#25140A" stroke-width="4"/>
+
+  <!-- Cheeks Blush -->
+  <ellipse cx="38" cy="74" rx="8" ry="5" fill="#FF8BA7" opacity="0.8"/>
+  <ellipse cx="90" cy="74" rx="8" ry="5" fill="#FF8BA7" opacity="0.8"/>
+
+  <!-- Eyes -->
+  <circle cx="48" cy="62" r="5" fill="#25140A"/>
+  <circle cx="50" cy="60" r="1.8" fill="#FFFFFF"/>
+  <circle cx="80" cy="62" r="5" fill="#25140A"/>
+  <circle cx="82" cy="60" r="1.8" fill="#FFFFFF"/>
+
+  <!-- Snout -->
+  <ellipse cx="64" cy="72" rx="14" ry="10" fill="#FCEBD9" stroke="#25140A" stroke-width="2.5"/>
+  <ellipse cx="64" cy="68" rx="4" ry="3" fill="#25140A"/>
+  <path d="M61 73 Q64 76 67 73" stroke="#25140A" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+</svg>
