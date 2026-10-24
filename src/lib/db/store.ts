@@ -3,6 +3,7 @@ import { getRandomQuestions } from "../questions/data";
 import { generateRoomCode, generateSessionToken, generateShareToken, hashToken } from "../tokens";
 import { evaluateRound, calculateGameResults, FinalGameScoreResult } from "../scoring";
 import { randomUUID } from "crypto";
+import { getSupabaseAdmin } from "./client";
 
 // In-memory persistent global store for fast local dev & zero-config testing
 // Persists across hot reloads in development via globalThis
@@ -483,7 +484,26 @@ export class GameStore {
       expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() // 30 days
     };
 
+    // Store in-memory
     viralQuizzesStore.set(id, quiz);
+
+    // Persist to Supabase if available
+    const supabase = getSupabaseAdmin();
+    if (supabase) {
+      try {
+        await supabase.from("viral_quizzes").insert({
+          id,
+          creator_name: quiz.creatorName,
+          secret_token: quiz.secretToken,
+          questions: quiz.questions,
+          created_at: quiz.createdAt,
+          expires_at: quiz.expiresAt
+        });
+      } catch (err) {
+        console.error("Supabase insert viral_quizzes error:", err);
+      }
+    }
+
     return { quiz, secretToken, id };
   }
 
@@ -500,7 +520,36 @@ export class GameStore {
     isCreator: boolean;
     expiresAt: string;
   } | null> {
-    const quiz = viralQuizzesStore.get(quizId.toUpperCase());
+    const cleanId = quizId.toUpperCase();
+    let quiz = viralQuizzesStore.get(cleanId);
+
+    if (!quiz) {
+      const supabase = getSupabaseAdmin();
+      if (supabase) {
+        try {
+          const { data } = await supabase
+            .from("viral_quizzes")
+            .select("*")
+            .eq("id", cleanId)
+            .maybeSingle();
+
+          if (data) {
+            quiz = {
+              id: data.id,
+              creatorName: data.creator_name,
+              secretToken: data.secret_token,
+              questions: data.questions,
+              createdAt: data.created_at,
+              expiresAt: data.expires_at
+            };
+            viralQuizzesStore.set(cleanId, quiz);
+          }
+        } catch (err) {
+          console.error("Supabase fetch viral_quizzes error:", err);
+        }
+      }
+    }
+
     if (!quiz) return null;
 
     const isCreator = Boolean(secretToken && quiz.secretToken === secretToken);
@@ -528,7 +577,32 @@ export class GameStore {
     friendName: string;
     answers: { questionId: string; selectedAnswer: string }[];
   }): Promise<ViralQuizAttempt> {
-    const quiz = viralQuizzesStore.get(params.quizId.toUpperCase());
+    const cleanId = params.quizId.toUpperCase();
+    let quiz = viralQuizzesStore.get(cleanId);
+
+    if (!quiz) {
+      const supabase = getSupabaseAdmin();
+      if (supabase) {
+        const { data } = await supabase
+          .from("viral_quizzes")
+          .select("*")
+          .eq("id", cleanId)
+          .maybeSingle();
+
+        if (data) {
+          quiz = {
+            id: data.id,
+            creatorName: data.creator_name,
+            secretToken: data.secret_token,
+            questions: data.questions,
+            createdAt: data.created_at,
+            expiresAt: data.expires_at
+          };
+          viralQuizzesStore.set(cleanId, quiz);
+        }
+      }
+    }
+
     if (!quiz) {
       throw new Error("Quiz not found or expired");
     }
@@ -578,6 +652,26 @@ export class GameStore {
     existingAttempts.push(attempt);
     viralAttemptsStore.set(quiz.id, existingAttempts);
 
+    // Persist to Supabase
+    const supabase = getSupabaseAdmin();
+    if (supabase) {
+      try {
+        await supabase.from("viral_quiz_attempts").insert({
+          id: attempt.id,
+          quiz_id: attempt.quizId,
+          friend_name: attempt.friendName,
+          answers: attempt.answers,
+          score: attempt.score,
+          total: attempt.total,
+          percentage: attempt.percentage,
+          verdict: attempt.verdict,
+          created_at: attempt.createdAt
+        });
+      } catch (err) {
+        console.error("Supabase insert viral_quiz_attempts error:", err);
+      }
+    }
+
     return attempt;
   }
 
@@ -594,8 +688,58 @@ export class GameStore {
     safeCount: number;
     blockedCount: number;
   }> {
-    const quiz = viralQuizzesStore.get(quizId.toUpperCase()) || null;
-    const attempts = [...(viralAttemptsStore.get(quizId.toUpperCase()) || [])];
+    const cleanId = quizId.toUpperCase();
+    let quiz = viralQuizzesStore.get(cleanId) || null;
+    let attempts = [...(viralAttemptsStore.get(cleanId) || [])];
+
+    const supabase = getSupabaseAdmin();
+    if (supabase) {
+      try {
+        if (!quiz) {
+          const { data: quizData } = await supabase
+            .from("viral_quizzes")
+            .select("*")
+            .eq("id", cleanId)
+            .maybeSingle();
+
+          if (quizData) {
+            quiz = {
+              id: quizData.id,
+              creatorName: quizData.creator_name,
+              secretToken: quizData.secret_token,
+              questions: quizData.questions,
+              createdAt: quizData.created_at,
+              expiresAt: quizData.expires_at
+            };
+            viralQuizzesStore.set(cleanId, quiz);
+          }
+        }
+
+        const { data: dbAttempts } = await supabase
+          .from("viral_quiz_attempts")
+          .select("*")
+          .eq("quiz_id", cleanId)
+          .order("score", { ascending: false })
+          .order("created_at", { ascending: true });
+
+        if (dbAttempts && dbAttempts.length > 0) {
+          attempts = dbAttempts.map(d => ({
+            id: d.id,
+            quizId: d.quiz_id,
+            friendName: d.friend_name,
+            answers: d.answers,
+            score: d.score,
+            total: d.total,
+            percentage: d.percentage,
+            verdict: d.verdict,
+            createdAt: d.created_at
+          }));
+          viralAttemptsStore.set(cleanId, attempts);
+        }
+      } catch (err) {
+        console.error("Supabase fetch leaderboard error:", err);
+      }
+    }
 
     // Sort by score descending, then by creation date ascending
     attempts.sort((a, b) => b.score - a.score || new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
@@ -616,7 +760,39 @@ export class GameStore {
    * Retrieves a single attempt by ID.
    */
   static async getViralQuizAttempt(quizId: string, attemptId: string): Promise<ViralQuizAttempt | null> {
-    const attempts = viralAttemptsStore.get(quizId.toUpperCase()) || [];
-    return attempts.find(a => a.id === attemptId) || null;
+    const cleanId = quizId.toUpperCase();
+    const attempts = viralAttemptsStore.get(cleanId) || [];
+    const found = attempts.find(a => a.id === attemptId);
+    if (found) return found;
+
+    const supabase = getSupabaseAdmin();
+    if (supabase) {
+      try {
+        const { data } = await supabase
+          .from("viral_quiz_attempts")
+          .select("*")
+          .eq("id", attemptId)
+          .maybeSingle();
+
+        if (data) {
+          const attempt: ViralQuizAttempt = {
+            id: data.id,
+            quizId: data.quiz_id,
+            friendName: data.friend_name,
+            answers: data.answers,
+            score: data.score,
+            total: data.total,
+            percentage: data.percentage,
+            verdict: data.verdict,
+            createdAt: data.created_at
+          };
+          return attempt;
+        }
+      } catch (err) {
+        console.error("Supabase fetch attempt error:", err);
+      }
+    }
+
+    return null;
   }
 }
