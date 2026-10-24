@@ -8,11 +8,53 @@ import { randomUUID } from "crypto";
 // Persists across hot reloads in development via globalThis
 declare global {
   var __lovematch_rooms: Map<string, Room> | undefined;
+  var __lovematch_viral_quizzes: Map<string, ViralQuiz> | undefined;
+  var __lovematch_viral_attempts: Map<string, ViralQuizAttempt[]> | undefined;
 }
 
 const roomsStore: Map<string, Room> = globalThis.__lovematch_rooms || new Map<string, Room>();
+const viralQuizzesStore: Map<string, ViralQuiz> = globalThis.__lovematch_viral_quizzes || new Map<string, ViralQuiz>();
+const viralAttemptsStore: Map<string, ViralQuizAttempt[]> = globalThis.__lovematch_viral_attempts || new Map<string, ViralQuizAttempt[]>();
+
 if (process.env.NODE_ENV !== "production") {
   globalThis.__lovematch_rooms = roomsStore;
+  globalThis.__lovematch_viral_quizzes = viralQuizzesStore;
+  globalThis.__lovematch_viral_attempts = viralAttemptsStore;
+}
+
+export interface ViralQuizQuestion {
+  id: string;
+  text: string;
+  emoji: string;
+  options: string[];
+  correctAnswer: string;
+}
+
+export interface ViralQuiz {
+  id: string;
+  creatorName: string;
+  secretToken: string;
+  questions: ViralQuizQuestion[];
+  createdAt: string;
+  expiresAt: string;
+}
+
+export interface ViralQuizAttempt {
+  id: string;
+  quizId: string;
+  friendName: string;
+  answers: {
+    questionId: string;
+    questionText: string;
+    selectedAnswer: string;
+    correctAnswer: string;
+    isMatch: boolean;
+  }[];
+  score: number;
+  total: number;
+  percentage: number;
+  verdict: "safe" | "warning" | "blocked";
+  createdAt: string;
 }
 
 export class GameStore {
@@ -414,5 +456,167 @@ export class GameStore {
       { id: p1.id, nickname: p1.nickname },
       { id: p2.id, nickname: p2.nickname }
     );
+  }
+
+  /**
+   * Creates a viral Don't Block Me quiz with creator's answer key.
+   */
+  static async createViralQuiz(params: {
+    creatorName: string;
+    questions: {
+      id: string;
+      text: string;
+      emoji: string;
+      options: string[];
+      correctAnswer: string;
+    }[];
+  }): Promise<{ quiz: ViralQuiz; secretToken: string; id: string }> {
+    const id = generateRoomCode(6);
+    const secretToken = generateSessionToken();
+
+    const quiz: ViralQuiz = {
+      id,
+      creatorName: params.creatorName.trim(),
+      secretToken,
+      questions: params.questions,
+      createdAt: new Date().toISOString(),
+      expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString() // 30 days
+    };
+
+    viralQuizzesStore.set(id, quiz);
+    return { quiz, secretToken, id };
+  }
+
+  /**
+   * Retrieves a viral quiz. If secretToken does not match, correctAnswer is stripped for zero-leak privacy!
+   */
+  static async getViralQuiz(
+    quizId: string,
+    secretToken?: string
+  ): Promise<{
+    id: string;
+    creatorName: string;
+    questions: { id: string; text: string; emoji: string; options: string[]; correctAnswer?: string }[];
+    isCreator: boolean;
+    expiresAt: string;
+  } | null> {
+    const quiz = viralQuizzesStore.get(quizId.toUpperCase());
+    if (!quiz) return null;
+
+    const isCreator = Boolean(secretToken && quiz.secretToken === secretToken);
+
+    return {
+      id: quiz.id,
+      creatorName: quiz.creatorName,
+      isCreator,
+      expiresAt: quiz.expiresAt,
+      questions: quiz.questions.map(q => ({
+        id: q.id,
+        text: q.text,
+        emoji: q.emoji,
+        options: q.options,
+        ...(isCreator ? { correctAnswer: q.correctAnswer } : {})
+      }))
+    };
+  }
+
+  /**
+   * Submits a friend's attempt on a viral quiz, evaluates answers, and assigns the verdict.
+   */
+  static async submitViralQuizAttempt(params: {
+    quizId: string;
+    friendName: string;
+    answers: { questionId: string; selectedAnswer: string }[];
+  }): Promise<ViralQuizAttempt> {
+    const quiz = viralQuizzesStore.get(params.quizId.toUpperCase());
+    if (!quiz) {
+      throw new Error("Quiz not found or expired");
+    }
+
+    const questionMap = new Map(quiz.questions.map(q => [q.id, q]));
+    let score = 0;
+
+    const evaluatedAnswers = params.answers.map(ans => {
+      const q = questionMap.get(ans.questionId);
+      const isMatch = Boolean(q && q.correctAnswer.trim().toLowerCase() === ans.selectedAnswer.trim().toLowerCase());
+      if (isMatch) score += 1;
+
+      return {
+        questionId: ans.questionId,
+        questionText: q?.text || "",
+        selectedAnswer: ans.selectedAnswer,
+        correctAnswer: q?.correctAnswer || "",
+        isMatch
+      };
+    });
+
+    const total = quiz.questions.length;
+    const percentage = Math.round((score / (total || 1)) * 100);
+
+    let verdict: "safe" | "warning" | "blocked" = "blocked";
+    if (percentage >= 70) {
+      verdict = "safe";
+    } else if (percentage >= 40) {
+      verdict = "warning";
+    } else {
+      verdict = "blocked";
+    }
+
+    const attempt: ViralQuizAttempt = {
+      id: randomUUID(),
+      quizId: quiz.id,
+      friendName: params.friendName.trim(),
+      answers: evaluatedAnswers,
+      score,
+      total,
+      percentage,
+      verdict,
+      createdAt: new Date().toISOString()
+    };
+
+    const existingAttempts = viralAttemptsStore.get(quiz.id) || [];
+    existingAttempts.push(attempt);
+    viralAttemptsStore.set(quiz.id, existingAttempts);
+
+    return attempt;
+  }
+
+  /**
+   * Retrieves the creator's secret scoreboard and leaderboard.
+   */
+  static async getViralQuizLeaderboard(
+    quizId: string,
+    secretToken?: string
+  ): Promise<{
+    quiz: ViralQuiz | null;
+    attempts: ViralQuizAttempt[];
+    totalPlayers: number;
+    safeCount: number;
+    blockedCount: number;
+  }> {
+    const quiz = viralQuizzesStore.get(quizId.toUpperCase()) || null;
+    const attempts = [...(viralAttemptsStore.get(quizId.toUpperCase()) || [])];
+
+    // Sort by score descending, then by creation date ascending
+    attempts.sort((a, b) => b.score - a.score || new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+
+    const safeCount = attempts.filter(a => a.verdict === "safe").length;
+    const blockedCount = attempts.filter(a => a.verdict === "blocked").length;
+
+    return {
+      quiz: secretToken && quiz?.secretToken === secretToken ? quiz : null,
+      attempts,
+      totalPlayers: attempts.length,
+      safeCount,
+      blockedCount
+    };
+  }
+
+  /**
+   * Retrieves a single attempt by ID.
+   */
+  static async getViralQuizAttempt(quizId: string, attemptId: string): Promise<ViralQuizAttempt | null> {
+    const attempts = viralAttemptsStore.get(quizId.toUpperCase()) || [];
+    return attempts.find(a => a.id === attemptId) || null;
   }
 }

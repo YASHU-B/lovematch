@@ -1,37 +1,26 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { HeartBackground } from "@/components/HeartBackground";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+import { KawaiiSkyBackground } from "@/components/KawaiiSkyBackground";
 
 export const metadata: Metadata = {
-  title: "LoveMatch — Who Knows Who Better? | Couples & Friends Quiz",
-  description: "The modern, mobile-first couples multiplayer quiz. Answer privately, reveal simultaneously, and discover your Love Sync Score!",
-  keywords: ["couples quiz", "who knows who better", "relationship game", "love match", "two player game", "dating quiz"],
-  authors: [{ name: "LoveMatch Team" }],
+  title: "Don't Block Me — Find Your Fake Friends | LoveMatch Quiz",
+  description: "Find friends you can't trust with Don't Block Me! Create your quiz, test your friends, reveal fake friends, and see who gets blocked!",
+  keywords: ["dont block me", "fake friends quiz", "block you test me", "who knows me best", "friendship quiz", "love match"],
+  authors: [{ name: "YouTest / LoveMatch" }],
   openGraph: {
-    title: "LoveMatch — Who Knows Who Better?",
-    description: "Answer. Reveal. Discover how in sync you really are.",
-    url: "https://lovematch.app",
-    siteName: "LoveMatch",
+    title: "Find Friends you can't trust — Don't Block Me",
+    description: "Create your quiz and find friends who you can't trust!",
+    url: "https://love2match.vercel.app",
+    siteName: "Don't Block Me",
     locale: "en_US",
     type: "website"
   },
   twitter: {
     card: "summary_large_image",
-    title: "LoveMatch — Who Knows Who Better?",
-    description: "The real two-player couples quiz. Answer privately, reveal simultaneously!"
+    title: "Don't Block Me — Find Your Fake Friends",
+    description: "Create your custom test, share on WhatsApp/Snapchat, and see who gets blocked!"
   },
   icons: {
     icon: "/favicon.ico"
@@ -39,7 +28,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#25112F",
+  themeColor: "#8AC0EF",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -52,12 +41,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col bg-[#25112F] text-[#FFF8FC] selection:bg-pink-500 selection:text-white">
-        <HeartBackground />
+    <html lang="en" className="h-full antialiased">
+      <body className="min-h-full flex flex-col bg-[#8AC0EF] text-[#1E293B] selection:bg-pink-400 selection:text-white">
+        <KawaiiSkyBackground />
         <Navbar />
         <main className="flex-1 flex flex-col relative z-10 w-full">
           {children}

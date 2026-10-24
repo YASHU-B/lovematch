@@ -1,110 +1,218 @@
+@import url('https://fonts.googleapis.com/css2?family=Kosugi+Maru&family=Shantell+Sans:ital,wght@0,300..800;1,300..800&family=Nunito:wght@400;600;700;800;900&display=swap');
 @import "tailwindcss";
 
 @layer base {
   :root {
-    --bg-deep-plum: #25112F;
-    --bg-midnight-purple: #351B4F;
-    --pink-soft: #F472B6;
-    --pink-bright: #EC4899;
-    --lavender-accent: #C4B5FD;
-    --warm-white: #FFF8FC;
+    --font-shantell: 'Shantell Sans', cursive, sans-serif;
+    --font-japanese: 'Kosugi Maru', sans-serif;
+    --theme-sky: #8AC0EF;
+    --theme-sky-dark: #5B9FE1;
+    --theme-cloud: #FFFFFF;
+    --theme-yellow: #FDE047;
+    --theme-pink: #F472B6;
+    --theme-rose: #FB7185;
+    --theme-mint: #86EFAC;
+    --theme-dark: #1E293B;
   }
 
   html, body {
-    background-color: #25112F;
-    color: #FFF8FC;
+    background-color: #8AC0EF;
+    color: #1E293B;
     min-height: 100dvh;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    font-family: var(--font-shantell), system-ui, -apple-system, sans-serif;
     overflow-x: hidden;
   }
 }
 
-/* Glassmorphism and romantic glow cards */
+/* Kawaii Neo-Brutalism & Bubbly UI */
+.card-kawaii {
+  background: #FFFFFF;
+  color: #1E293B;
+  border: 3px solid #1E293B;
+  border-radius: 1.75rem;
+  box-shadow: 0 8px 0 #1E293B;
+}
+
+.card-kawaii-sm {
+  background: #FFFFFF;
+  color: #1E293B;
+  border: 2px solid #1E293B;
+  border-radius: 1.25rem;
+  box-shadow: 0 4px 0 #1E293B;
+}
+
+.card-kawaii-soft {
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  border-radius: 1.75rem;
+  box-shadow: 0 12px 30px -8px rgba(18, 53, 91, 0.18), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* 3D Pushable Kawaii Buttons */
+.btn-3d-yellow {
+  background: #FACC15;
+  color: #1E293B;
+  border: 2.5px solid #1E293B;
+  border-radius: 1.25rem;
+  box-shadow: 0 5px 0 #CA8A04;
+  transition: all 0.12s ease-in-out;
+}
+.btn-3d-yellow:hover {
+  background: #FDE047;
+}
+.btn-3d-yellow:active {
+  transform: translateY(4px);
+  box-shadow: 0 1px 0 #CA8A04;
+}
+
+.btn-3d-pink {
+  background: #F472B6;
+  color: #FFFFFF;
+  border: 2.5px solid #1E293B;
+  border-radius: 1.25rem;
+  box-shadow: 0 5px 0 #BE185D;
+  transition: all 0.12s ease-in-out;
+}
+.btn-3d-pink:hover {
+  background: #FB7185;
+}
+.btn-3d-pink:active {
+  transform: translateY(4px);
+  box-shadow: 0 1px 0 #BE185D;
+}
+
+.btn-3d-blue {
+  background: #38BDF8;
+  color: #FFFFFF;
+  border: 2.5px solid #1E293B;
+  border-radius: 1.25rem;
+  box-shadow: 0 5px 0 #0284C7;
+  transition: all 0.12s ease-in-out;
+}
+.btn-3d-blue:hover {
+  background: #60A5FA;
+}
+.btn-3d-blue:active {
+  transform: translateY(4px);
+  box-shadow: 0 1px 0 #0284C7;
+}
+
+.btn-3d-white {
+  background: #FFFFFF;
+  color: #1E293B;
+  border: 2.5px solid #1E293B;
+  border-radius: 1.25rem;
+  box-shadow: 0 5px 0 #94A3B8;
+  transition: all 0.12s ease-in-out;
+}
+.btn-3d-white:hover {
+  background: #F8FAFC;
+}
+.btn-3d-white:active {
+  transform: translateY(4px);
+  box-shadow: 0 1px 0 #94A3B8;
+}
+
+.btn-3d-green {
+  background: #4ADE80;
+  color: #1E293B;
+  border: 2.5px solid #1E293B;
+  border-radius: 1.25rem;
+  box-shadow: 0 5px 0 #16A34A;
+  transition: all 0.12s ease-in-out;
+}
+.btn-3d-green:hover {
+  background: #86EFAC;
+}
+.btn-3d-green:active {
+  transform: translateY(4px);
+  box-shadow: 0 1px 0 #16A34A;
+}
+
+/* Cloud and Sky Animations */
+@keyframes cloudDriftLeft {
+  0% { transform: translateX(0); }
+  50% { transform: translateX(-30px); }
+  100% { transform: translateX(0); }
+}
+
+@keyframes cloudDriftRight {
+  0% { transform: translateX(0); }
+  50% { transform: translateX(35px); }
+  100% { transform: translateX(0); }
+}
+
+.animate-cloud-left {
+  animation: cloudDriftLeft 14s ease-in-out infinite;
+}
+
+.animate-cloud-right {
+  animation: cloudDriftRight 18s ease-in-out infinite;
+}
+
+@keyframes floatSticker {
+  0%, 100% { transform: translateY(0) rotate(var(--rot, 0deg)); }
+  50% { transform: translateY(-8px) rotate(calc(var(--rot, 0deg) + 2deg)); }
+}
+
+.animate-float-sticker {
+  animation: floatSticker 3.5s ease-in-out infinite;
+}
+
+@keyframes sparkleSpin {
+  0% { transform: scale(0.85) rotate(0deg); opacity: 0.7; }
+  50% { transform: scale(1.15) rotate(180deg); opacity: 1; }
+  100% { transform: scale(0.85) rotate(360deg); opacity: 0.7; }
+}
+
+.animate-sparkle-spin {
+  animation: sparkleSpin 4s linear infinite;
+}
+
+/* Compatibility helper classes for existing components */
 .glass-panel {
-  background: rgba(53, 27, 79, 0.65);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(244, 114, 182, 0.22);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(12px);
+  border: 2.5px solid #1E293B;
+  border-radius: 1.75rem;
+  box-shadow: 0 8px 0 #1E293B;
+  color: #1E293B;
 }
 
 .glass-card {
-  background: rgba(37, 17, 47, 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(196, 181, 253, 0.18);
-  box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.25);
+  background: #FFFFFF;
+  border: 2px solid #1E293B;
+  border-radius: 1.25rem;
+  box-shadow: 0 4px 0 #1E293B;
+  color: #1E293B;
 }
 
 .glass-card-interactive {
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.15s ease-in-out;
+  cursor: pointer;
 }
-
 .glass-card-interactive:hover {
-  border-color: rgba(236, 72, 153, 0.5);
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px -5px rgba(236, 72, 153, 0.3);
+  box-shadow: 0 6px 0 #1E293B;
 }
-
-.glass-card-selected {
-  background: linear-gradient(135deg, rgba(236, 72, 153, 0.35) 0%, rgba(53, 27, 79, 0.8) 100%);
-  border: 2px solid #EC4899;
-  box-shadow: 0 0 20px rgba(236, 72, 153, 0.45);
-}
-
-/* Gradients */
-.bg-gradient-romantic {
-  background: linear-gradient(135deg, #EC4899 0%, #C4B5FD 100%);
-}
-
-.bg-gradient-hero {
-  background: radial-gradient(circle at 50% 0%, rgba(236, 72, 153, 0.25) 0%, rgba(37, 17, 47, 0) 70%),
-              radial-gradient(circle at 100% 50%, rgba(196, 181, 253, 0.15) 0%, rgba(37, 17, 47, 0) 60%),
-              linear-gradient(180deg, #25112F 0%, #190a20 100%);
+.glass-card-interactive:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #1E293B;
 }
 
 .text-gradient-romantic {
-  background: linear-gradient(135deg, #FFF8FC 20%, #F472B6 70%, #C4B5FD 100%);
+  background: linear-gradient(135deg, #1E293B 0%, #0284C7 50%, #EC4899 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
-.text-gradient-accent {
-  background: linear-gradient(135deg, #F472B6 0%, #EC4899 60%, #C4B5FD 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-/* Animations */
-@keyframes pulseGlow {
-  0%, 100% {
-    box-shadow: 0 0 15px rgba(236, 72, 153, 0.3);
-  }
-  50% {
-    box-shadow: 0 0 30px rgba(236, 72, 153, 0.7);
-  }
-}
-
-.animate-pulse-glow {
-  animation: pulseGlow 2.5s infinite ease-in-out;
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0px) rotate(0deg); }
-  50% { transform: translateY(-8px) rotate(2deg); }
-}
-
-.animate-float {
-  animation: float 4s ease-in-out infinite;
-}
-
-/* Mobile Safe Areas and Minimum Touch Target (44x44px) */
 .min-touch-target {
-  min-height: 44px;
-  min-width: 44px;
+  min-height: 48px;
+  min-width: 48px;
 }
 
-/* Hide scrollbar for category sliders */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }

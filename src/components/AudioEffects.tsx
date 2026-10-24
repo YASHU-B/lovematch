@@ -97,6 +97,34 @@ class SoundEngine {
     osc.start();
     osc.stop(this.ctx.currentTime + 0.2);
   }
+
+  // Celebratory fanfare for 100% or high score safe verdict
+  playFanfare() {
+    this.playMatchChime();
+  }
+
+  // Dramatic buzz for blocked fake friend verdict
+  playBuzzer() {
+    if (this.isMuted) return;
+    this.initCtx();
+    if (!this.ctx) return;
+
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+
+    osc.type = "sawtooth";
+    osc.frequency.setValueAtTime(160, this.ctx.currentTime);
+    osc.frequency.linearRampToValueAtTime(110, this.ctx.currentTime + 0.25);
+
+    gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.25);
+
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+
+    osc.start();
+    osc.stop(this.ctx.currentTime + 0.25);
+  }
 }
 
 export const soundEffects = new SoundEngine();

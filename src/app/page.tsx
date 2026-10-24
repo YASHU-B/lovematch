@@ -1,323 +1,240 @@
-import React from "react";
+"use client";
+
+import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { 
   Sparkles, 
-  Heart, 
-  Share2, 
   ArrowRight, 
-  CheckCircle2, 
-  Smartphone, 
-  HelpCircle
+  Users, 
+  Play
 } from "lucide-react";
-import { CATEGORIES } from "@/lib/questions/data";
 import { PlayfulMascot } from "@/components/PlayfulMascot";
+import { soundEffects } from "@/components/AudioEffects";
 
 export default function LandingPage() {
-  const faqItems = [
+  const router = useRouter();
+  const [creatorName, setCreatorName] = useState("");
+
+  const handleStartQuiz = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!creatorName.trim()) return;
+    soundEffects.playPop();
+    if (typeof window !== "undefined") {
+      localStorage.setItem("lovematch_nickname", creatorName.trim());
+    }
+    router.push(`/create?name=${encodeURIComponent(creatorName.trim())}`);
+  };
+
+  const steps = [
     {
-      q: "Do we need to download an app or create an account?",
-      a: "No! LoveMatch is 100% web-based and requires zero app installs or signups. Simply enter your nickname, share your private room link or code with your partner, and play instantly."
+      step: "01",
+      emoji: "✍️",
+      title: "Set Your Answer Key",
+      desc: "Answer 10 hilarious & personal questions about your habits, food, and secrets."
     },
     {
-      q: "Can my partner peek at my answers before revealing?",
-      a: "Never. Your answers are encrypted and held privately on our secure servers. They are only unlocked simultaneously once both of you have locked in your submissions."
+      step: "02",
+      emoji: "📲",
+      title: "Share with Friends",
+      desc: "Send your unique link on WhatsApp, Snapchat, Instagram Story, or group chats."
     },
     {
-      q: "How does the multiplayer work across different phones?",
-      a: "Each round alternates roles: one person answers for themselves (the Subject), and their partner predicts what they chose (the Guesser). When both submit, the real-time engine reveals both cards together and calculates your match points."
-    },
-    {
-      q: "Is LoveMatch only for romantic couples?",
-      a: "While designed with couples in mind (dating, married, and long-distance), we also include a dedicated 'Best Friends Mode' perfect for besties, roommates, and duo friendships!"
-    },
-    {
-      q: "How long is our private room kept?",
-      a: "Rooms expire automatically after 24 hours of inactivity. We never sell your personal answers or store relationship details."
+      step: "03",
+      emoji: "👑",
+      title: "Expose Fake Friends",
+      desc: "Check your private scoreboard to see who knows you best and who gets BLOCKED!"
     }
   ];
 
+  const sampleResults = [
+    { name: "Chloe (Bestie)", score: "10/10", verdict: "SAFE! 💖", safe: true },
+    { name: "Sam (Roommate)", score: "8/10", verdict: "SAFE! 🎉", safe: true },
+    { name: "Leo (Acquaintance)", score: "5/10", verdict: "ON THIN ICE ⚠️", warning: true },
+    { name: "Jake (Ex)", score: "1/10", verdict: "BLOCKED! 🚫", blocked: true }
+  ];
+
   return (
-    <div className="flex flex-col items-center w-full min-h-screen relative overflow-hidden">
-      {/* Floating Animated Badges / Stickers (Inspired by block.youtest.me) */}
-      <div className="hidden lg:block absolute top-28 left-8 animate-float pointer-events-none select-none z-10">
-        <div className="px-3 py-1.5 rounded-2xl bg-pink-500/20 backdrop-blur-md border border-pink-400/40 text-pink-300 text-xs font-black rotate-[-6deg] shadow-lg shadow-pink-500/20">
-          🙈 No Peeking!
+    <div className="flex flex-col items-center w-full min-h-screen relative overflow-hidden pb-16">
+      {/* Floating Animated Badges / Stickers (block.youtest.me style) */}
+      <div className="hidden lg:block absolute top-28 left-8 animate-float-sticker pointer-events-none select-none z-10" style={{ "--rot": "-6deg" } as React.CSSProperties}>
+        <div className="px-3.5 py-1.5 rounded-2xl bg-yellow-300 border-2 border-slate-900 text-slate-900 text-xs font-black shadow-[0_3px_0_#1E293B]">
+          🙈 Don&apos;t Block Me!
         </div>
       </div>
-      <div className="hidden lg:block absolute top-40 right-10 animate-float pointer-events-none select-none z-10" style={{ animationDelay: "1.5s" }}>
-        <div className="px-3 py-1.5 rounded-2xl bg-purple-500/20 backdrop-blur-md border border-purple-400/40 text-purple-200 text-xs font-black rotate-[6deg] shadow-lg shadow-purple-500/20">
-          🔮 Mind Readers?
+      <div className="hidden lg:block absolute top-40 right-10 animate-float-sticker pointer-events-none select-none z-10" style={{ "--rot": "6deg", animationDelay: "1.2s" } as React.CSSProperties}>
+        <div className="px-3.5 py-1.5 rounded-2xl bg-pink-400 border-2 border-slate-900 text-white text-xs font-black shadow-[0_3px_0_#1E293B]">
+          🔮 Who Can You Trust?
         </div>
       </div>
-      <div className="hidden lg:block absolute top-80 left-12 animate-float pointer-events-none select-none z-10" style={{ animationDelay: "2.5s" }}>
-        <div className="px-3 py-1.5 rounded-2xl bg-rose-500/20 backdrop-blur-md border border-rose-400/40 text-rose-200 text-xs font-black rotate-[-4deg] shadow-lg shadow-rose-500/20">
-          🍿 Plot Twist Incoming!
+      <div className="hidden lg:block absolute top-96 left-12 animate-float-sticker pointer-events-none select-none z-10" style={{ "--rot": "-4deg", animationDelay: "2.4s" } as React.CSSProperties}>
+        <div className="px-3.5 py-1.5 rounded-2xl bg-emerald-400 border-2 border-slate-900 text-slate-900 text-xs font-black shadow-[0_3px_0_#1E293B]">
+          👑 10/10 True Bestie
         </div>
       </div>
-      <div className="hidden lg:block absolute top-80 right-14 animate-float pointer-events-none select-none z-10" style={{ animationDelay: "3s" }}>
-        <div className="px-3 py-1.5 rounded-2xl bg-emerald-500/20 backdrop-blur-md border border-emerald-400/40 text-emerald-200 text-xs font-black rotate-[5deg] shadow-lg shadow-emerald-500/20">
-          ⚡ 100% Live Sync!
+      <div className="hidden lg:block absolute top-96 right-12 animate-float-sticker pointer-events-none select-none z-10" style={{ "--rot": "5deg", animationDelay: "3.2s" } as React.CSSProperties}>
+        <div className="px-3.5 py-1.5 rounded-2xl bg-rose-400 border-2 border-slate-900 text-white text-xs font-black shadow-[0_3px_0_#1E293B]">
+          🚫 Fake Friend Alert!
         </div>
       </div>
 
       {/* Hero Section */}
-      <section className="w-full relative px-4 sm:px-6 pt-6 sm:pt-10 pb-16 max-w-5xl mx-auto flex flex-col items-center text-center">
+      <section className="w-full relative px-4 sm:px-6 pt-6 sm:pt-10 pb-12 max-w-4xl mx-auto flex flex-col items-center text-center">
         {/* Playful Interactive Mascot */}
         <div className="mb-4">
           <PlayfulMascot size="md" interactive={true} />
         </div>
 
-        {/* Subtle pill tag */}
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass-card border border-pink-500/40 text-pink-300 text-xs sm:text-sm font-semibold mb-5 animate-pulse-glow">
-          <Sparkles className="w-4 h-4 text-pink-400" />
-          <span>The #1 Couples & Friends Multiplayer Quiz</span>
+        {/* Pill Tag */}
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border-2 border-slate-900 text-slate-800 text-xs sm:text-sm font-black mb-4 shadow-[0_3px_0_#1E293B]">
+          <Sparkles className="w-4 h-4 text-yellow-500 fill-yellow-400" />
+          <span>The Viral &quot;Don&apos;t Block Me&quot; Friendship Quiz</span>
         </div>
 
-        {/* Main Headline */}
-        <h1 className="text-3xl sm:text-5xl md:text-6xl font-black tracking-tight leading-[1.15] max-w-3xl mb-4">
-          How Well Do You <span className="text-gradient-romantic">Really Know</span> Your Person?
+        {/* Main Title */}
+        <h1 className="text-3xl sm:text-5xl md:text-6xl font-black text-slate-900 tracking-tight leading-[1.15] max-w-2xl mb-4">
+          Find Friends You <span className="text-pink-600 underline decoration-wavy decoration-yellow-400">Can&apos;t Trust!</span>
         </h1>
 
-        {/* Supporting Text */}
-        <p className="text-base sm:text-lg md:text-xl text-pink-200/90 max-w-2xl mb-8 leading-relaxed">
-          Answer the questions privately. Reveal the truth together. Discover how in sync you really are.
+        <p className="text-base sm:text-xl font-bold text-slate-700 max-w-xl mb-8 leading-snug">
+          Answer 10 questions about yourself. Share your link with friends. See who knows you best and who gets <span className="text-rose-600 font-black">BLOCKED! 🚫</span>
         </p>
 
-        {/* CTA Buttons */}
-        <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto mb-14">
-          <Link
-            href="/play"
-            className="w-full sm:w-auto min-touch-target flex items-center justify-center gap-2 px-8 py-4 rounded-2xl bg-gradient-to-r from-pink-500 via-rose-500 to-pink-600 hover:from-pink-600 hover:to-rose-700 text-white font-extrabold text-base sm:text-lg shadow-xl shadow-pink-500/35 transition-all transform hover:-translate-y-0.5 active:scale-95"
-          >
-            <span>Play Now</span>
-            <ArrowRight className="w-5 h-5" />
-          </Link>
-
-          <Link
-            href="/create"
-            className="w-full sm:w-auto min-touch-target flex items-center justify-center gap-2 px-7 py-4 rounded-2xl glass-card text-pink-100 hover:text-white hover:border-pink-500/60 font-bold text-base transition-all"
-          >
-            <Sparkles className="w-5 h-5 text-pink-400" />
-            <span>Create a Challenge</span>
-          </Link>
-        </div>
-
-        {/* Live Reveal Interactive Mockup Preview */}
-        <div className="w-full max-w-md sm:max-w-lg glass-panel rounded-3xl p-5 sm:p-6 border border-pink-500/30 shadow-2xl relative">
-          <div className="flex items-center justify-between border-b border-pink-500/20 pb-3 mb-4 text-xs font-semibold text-pink-300">
-            <span className="flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-              Simultaneous Reveal Preview
+        {/* Fast Action Card / Quiz Creator Box */}
+        <div className="w-full max-w-md bg-white border-3 border-slate-900 rounded-3xl p-6 sm:p-8 shadow-[0_8px_0_#1E293B] mb-8 text-left">
+          <div className="text-center mb-5">
+            <span className="text-xs font-black uppercase tracking-wider text-slate-500 block mb-1">
+              Step 1 of 2: Who is creating the test?
             </span>
-            <span className="text-pink-400">Round 1 of 5</span>
-          </div>
-
-          <p className="text-base sm:text-lg font-bold text-white mb-5">
-            &ldquo;What is your partner&apos;s favourite food?&rdquo;
-          </p>
-
-          <div className="grid grid-cols-2 gap-3 mb-4">
-            {/* Subject answer card */}
-            <div className="glass-card rounded-2xl p-3.5 border border-pink-500/40 text-left bg-pink-500/10">
-              <span className="text-[11px] font-semibold text-pink-300 block mb-1">Priya (Subject)</span>
-              <div className="text-sm sm:text-base font-extrabold text-white flex items-center gap-1.5">
-                <span>Biryani</span>
-              </div>
-            </div>
-
-            {/* Guesser prediction card */}
-            <div className="glass-card rounded-2xl p-3.5 border border-pink-500/40 text-left bg-pink-500/10">
-              <span className="text-[11px] font-semibold text-pink-300 block mb-1">Rohan (Predicted)</span>
-              <div className="text-sm sm:text-base font-extrabold text-white flex items-center gap-1.5">
-                <span>Biryani</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Match Banner */}
-          <div className="p-3 rounded-2xl bg-gradient-to-r from-emerald-500/20 via-pink-500/20 to-purple-500/20 border border-emerald-400/40 flex items-center justify-between text-xs sm:text-sm font-bold">
-            <div className="flex items-center gap-2 text-emerald-300">
-              <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-              <span>It&apos;s a Match!</span>
-            </div>
-            <span className="px-2 py-0.5 rounded-full bg-emerald-500/30 text-emerald-200 text-xs">
-              +10 Points
-            </span>
-          </div>
-        </div>
-      </section>
-
-      {/* 3-Step How It Works */}
-      <section className="w-full py-16 px-4 sm:px-6 bg-[#1a0a22]/70 border-y border-pink-500/15">
-        <div className="max-w-5xl mx-auto flex flex-col items-center">
-          <div className="text-center mb-12">
-            <span className="text-xs font-bold uppercase tracking-wider text-pink-400">Simple & Private</span>
-            <h2 className="text-2xl sm:text-4xl font-extrabold text-white mt-1">
-              How LoveMatch Works
+            <h2 className="text-xl font-black text-slate-900">
+              Enter Your Name to Begin 🎯
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
-            <div className="glass-card rounded-3xl p-6 flex flex-col items-start border border-pink-500/20">
-              <div className="w-12 h-12 rounded-2xl bg-pink-500/20 border border-pink-500/40 flex items-center justify-center text-pink-400 mb-4 font-black text-xl">
-                1
-              </div>
-              <h3 className="text-lg font-bold text-white mb-2">Create & Invite</h3>
-              <p className="text-sm text-pink-200/80 leading-relaxed">
-                Pick a category and share your private 6-letter room code or link via WhatsApp or Instagram. No passwords or app downloads needed.
-              </p>
+          <form onSubmit={handleStartQuiz} className="space-y-4">
+            <div>
+              <input
+                type="text"
+                required
+                maxLength={20}
+                value={creatorName}
+                onChange={(e) => setCreatorName(e.target.value)}
+                placeholder="e.g. Alex or Sarah"
+                className="w-full px-4 py-3.5 rounded-2xl bg-sky-50 border-2 border-slate-900 focus:bg-white focus:outline-none text-slate-900 font-bold text-base placeholder:text-slate-400 shadow-[inset_0_2px_4px_rgba(0,0,0,0.06)]"
+              />
             </div>
 
-            <div className="glass-card rounded-3xl p-6 flex flex-col items-start border border-pink-500/20">
-              <div className="w-12 h-12 rounded-2xl bg-purple-500/20 border border-purple-500/40 flex items-center justify-center text-purple-400 mb-4 font-black text-xl">
-                2
-              </div>
-              <h3 className="text-lg font-bold text-white mb-2">Answer in Private</h3>
-              <p className="text-sm text-pink-200/80 leading-relaxed">
-                Each round alternates roles: one person answers honestly, and the other predicts their choice. Answers stay strictly secret until locked in.
-              </p>
-            </div>
-
-            <div className="glass-card rounded-3xl p-6 flex flex-col items-start border border-pink-500/20">
-              <div className="w-12 h-12 rounded-2xl bg-rose-500/20 border border-rose-500/40 flex items-center justify-center text-rose-400 mb-4 font-black text-xl">
-                3
-              </div>
-              <h3 className="text-lg font-bold text-white mb-2">Simultaneous Reveal</h3>
-              <p className="text-sm text-pink-200/80 leading-relaxed">
-                Once both tap Lock In, both answers reveal at the exact same second! Celebrate matches, laugh at surprises, and earn your Love Sync Score.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Featured Categories Carousel / Grid */}
-      <section className="w-full py-16 px-4 sm:px-6 max-w-5xl mx-auto">
-        <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4 mb-8">
-          <div>
-            <span className="text-xs font-bold uppercase tracking-wider text-pink-400">10 Curated Packs</span>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-white mt-1">
-              Popular Quiz Categories
-            </h2>
-          </div>
-          <Link
-            href="/play"
-            className="text-sm font-semibold text-pink-400 hover:text-pink-300 flex items-center gap-1"
-          >
-            <span>View All Categories</span>
-            <ArrowRight className="w-4 h-4" />
-          </Link>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {CATEGORIES.slice(0, 6).map((cat) => (
-            <Link
-              key={cat.id}
-              href={`/create?category=${cat.id}`}
-              className="glass-card glass-card-interactive rounded-2xl p-5 flex flex-col justify-between group"
+            <button
+              type="submit"
+              disabled={!creatorName.trim()}
+              className="w-full py-4 rounded-2xl bg-yellow-400 hover:bg-yellow-300 disabled:opacity-50 disabled:cursor-not-allowed border-2.5 border-slate-900 text-slate-900 font-black text-base shadow-[0_5px_0_#CA8A04] active:translate-y-1 active:shadow-none transition-all flex items-center justify-center gap-2"
             >
-              <div>
-                <div className="flex items-center justify-between mb-3">
-                  <div className="w-10 h-10 rounded-xl bg-pink-500/20 border border-pink-500/30 flex items-center justify-center text-pink-400 group-hover:scale-110 transition-transform">
-                    <Heart className="w-5 h-5 fill-pink-400/20" />
-                  </div>
-                  {cat.badge && (
-                    <span className="px-2.5 py-0.5 rounded-full bg-pink-500/20 text-pink-300 text-[10px] font-bold uppercase tracking-wider">
-                      {cat.badge}
-                    </span>
-                  )}
-                </div>
-                <h3 className="text-base font-bold text-white mb-1 group-hover:text-pink-300 transition-colors">
-                  {cat.name}
-                </h3>
-                <p className="text-xs text-pink-200/75 leading-relaxed">
-                  {cat.description}
-                </p>
-              </div>
+              <span>Create My Quiz!</span>
+              <ArrowRight className="w-5 h-5" />
+            </button>
+          </form>
 
-              <div className="mt-4 pt-3 border-t border-pink-500/15 flex items-center justify-between text-xs font-medium text-pink-300">
-                <span>Start Quiz</span>
-                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-              </div>
-            </Link>
-          ))}
+          <div className="mt-4 pt-4 border-t border-slate-200 flex items-center justify-between text-xs font-bold text-slate-500">
+            <span>⚡ Takes 60 seconds</span>
+            <span>🔒 100% Free • No Login</span>
+          </div>
+        </div>
+
+        {/* Alternative Action: Live 2-Player Duel */}
+        <div className="flex flex-wrap items-center justify-center gap-3">
+          <Link
+            href="/play"
+            className="px-5 py-2.5 rounded-2xl bg-white hover:bg-slate-50 border-2 border-slate-900 text-slate-800 text-xs sm:text-sm font-black shadow-[0_3px_0_#1E293B] active:translate-y-0.5 active:shadow-none transition-all flex items-center gap-2"
+          >
+            <Play className="w-4 h-4 text-pink-500" />
+            <span>Play Live 2-Player Duel</span>
+          </Link>
+
+          <Link
+            href="/join"
+            className="px-5 py-2.5 rounded-2xl bg-sky-100 hover:bg-sky-200 border-2 border-slate-900 text-slate-800 text-xs sm:text-sm font-black shadow-[0_3px_0_#1E293B] active:translate-y-0.5 active:shadow-none transition-all flex items-center gap-2"
+          >
+            <Users className="w-4 h-4 text-sky-600" />
+            <span>Enter Room Code</span>
+          </Link>
         </div>
       </section>
 
-      {/* Love Sync Score Showcase */}
-      <section className="w-full py-16 px-4 sm:px-6 bg-[#210e2b]/80 border-t border-pink-500/15">
-        <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center gap-10">
-          <div className="flex-1 text-center md:text-left">
-            <span className="text-xs font-bold uppercase tracking-wider text-pink-400">Shareable Memories</span>
-            <h2 className="text-2xl sm:text-4xl font-extrabold text-white mt-1 mb-4">
-              Earn Your Love Sync Score & Download Story Cards
-            </h2>
-            <p className="text-sm sm:text-base text-pink-200/85 leading-relaxed mb-6">
-              Are you <em>Mind Readers</em> (90–100%) or will you find unexpected <em>Plot Twists</em>? At the end of every quiz, generate high-definition story cards ready for your Instagram Stories and WhatsApp Status.
-            </p>
-            <div className="flex flex-wrap gap-4 justify-center md:justify-start">
-              <div className="flex items-center gap-2 text-xs font-semibold text-pink-300">
-                <Smartphone className="w-4 h-4 text-pink-400" />
-                <span>Instagram Story (1080×1920)</span>
-              </div>
-              <div className="flex items-center gap-2 text-xs font-semibold text-pink-300">
-                <Share2 className="w-4 h-4 text-pink-400" />
-                <span>One-Tap WhatsApp Share</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="w-64 sm:w-72 glass-panel rounded-3xl p-6 text-center border-2 border-pink-500/40 shadow-2xl relative animate-float">
-            <div className="w-36 h-36 mx-auto rounded-full bg-pink-500/20 border-4 border-pink-500 flex flex-col items-center justify-center shadow-[0_0_35px_rgba(236,72,153,0.4)] mb-4">
-              <span className="text-4xl font-black text-white">88%</span>
-              <span className="text-[10px] font-bold text-pink-300 uppercase tracking-wider">Sync Score</span>
-            </div>
-            <h4 className="text-xl font-extrabold text-pink-300 mb-1">Perfectly in Sync</h4>
-            <p className="text-xs text-pink-200/70">Priya & Rohan answered 5 rounds together</p>
-          </div>
-        </div>
-      </section>
-
-      {/* FAQs Section */}
-      <section className="w-full py-16 px-4 sm:px-6 max-w-3xl mx-auto">
+      {/* How it Works Section */}
+      <section className="w-full max-w-4xl px-4 sm:px-6 py-12 mx-auto">
         <div className="text-center mb-10">
-          <span className="text-xs font-bold uppercase tracking-wider text-pink-400">Got Questions?</span>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-white mt-1">
-            Frequently Asked Questions
+          <span className="text-xs font-black uppercase tracking-wider text-slate-700 bg-white border border-slate-900 px-3 py-1 rounded-full shadow-[0_2px_0_#1E293B]">
+            Simple & Viral
+          </span>
+          <h2 className="text-2xl sm:text-3xl font-black text-slate-900 mt-2">
+            How &quot;Don&apos;t Block Me&quot; Works
           </h2>
         </div>
 
-        <div className="space-y-4">
-          {faqItems.map((item, idx) => (
-            <div key={idx} className="glass-card rounded-2xl p-5 border border-pink-500/20">
-              <h3 className="text-base font-bold text-white mb-2 flex items-start gap-2">
-                <HelpCircle className="w-4 h-4 text-pink-400 mt-1 shrink-0" />
-                <span>{item.q}</span>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {steps.map((item, idx) => (
+            <div
+              key={idx}
+              className="bg-white border-3 border-slate-900 rounded-3xl p-6 shadow-[0_6px_0_#1E293B] flex flex-col items-center text-center relative"
+            >
+              <div className="text-4xl mb-3">{item.emoji}</div>
+              <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-1">
+                Step {item.step}
+              </span>
+              <h3 className="text-lg font-black text-slate-900 mb-2">
+                {item.title}
               </h3>
-              <p className="text-xs sm:text-sm text-pink-200/80 pl-6 leading-relaxed">
-                {item.a}
+              <p className="text-xs font-bold text-slate-600 leading-relaxed">
+                {item.desc}
               </p>
             </div>
           ))}
         </div>
       </section>
 
-      {/* Bottom Sticky Mobile / Final CTA */}
-      <section className="w-full py-12 px-4 sm:px-6 bg-gradient-to-t from-[#16071c] to-transparent text-center">
-        <div className="max-w-md mx-auto">
-          <h3 className="text-xl sm:text-2xl font-extrabold text-white mb-3">
-            Ready to test your bond?
-          </h3>
-          <p className="text-xs sm:text-sm text-pink-200/80 mb-6">
-            Create a private challenge in under 15 seconds. Free forever.
-          </p>
-          <Link
-            href="/create"
-            className="w-full min-touch-target flex items-center justify-center gap-2 px-8 py-4 rounded-2xl bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-extrabold text-base shadow-xl shadow-pink-500/30 transition-transform active:scale-95"
-          >
-            <Sparkles className="w-5 h-5" />
-            <span>Create Free Challenge</span>
-          </Link>
+      {/* Live Sample Scoreboard Preview (Safe vs Blocked) */}
+      <section className="w-full max-w-md px-4 sm:px-6 py-6 mx-auto">
+        <div className="bg-white border-3 border-slate-900 rounded-3xl p-6 shadow-[0_8px_0_#1E293B]">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <span className="text-2xl">🏆</span>
+              <div>
+                <h3 className="text-base font-black text-slate-900">Live Scoreboard</h3>
+                <p className="text-[11px] font-bold text-slate-500">Who passed vs who got blocked</p>
+              </div>
+            </div>
+            <span className="px-2.5 py-1 rounded-full bg-yellow-300 border border-slate-900 text-[10px] font-black text-slate-900">
+              SAMPLE
+            </span>
+          </div>
+
+          <div className="space-y-2.5">
+            {sampleResults.map((res, i) => (
+              <div
+                key={i}
+                className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border-2 border-slate-900"
+              >
+                <div className="flex items-center gap-2.5">
+                  <span className="font-mono font-black text-xs text-slate-400">#{i + 1}</span>
+                  <span className="font-bold text-xs text-slate-900">{res.name}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="font-mono font-black text-xs text-slate-700">{res.score}</span>
+                  <span
+                    className={`px-2 py-0.5 rounded-full text-[10px] font-black border border-slate-900 ${
+                      res.safe
+                        ? "bg-emerald-300 text-slate-900"
+                        : res.warning
+                        ? "bg-amber-300 text-slate-900"
+                        : "bg-rose-400 text-white"
+                    }`}
+                  >
+                    {res.verdict}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
     </div>

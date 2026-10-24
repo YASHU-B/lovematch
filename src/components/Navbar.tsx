@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { BrandLogo } from "./BrandLogo";
-import { Volume2, VolumeX, Sparkles, LogIn } from "lucide-react";
+import { Volume2, VolumeX, Sparkles, KeyRound } from "lucide-react";
 import { soundEffects } from "./AudioEffects";
 
 export function Navbar() {
@@ -17,8 +17,8 @@ export function Navbar() {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full glass-panel border-b border-pink-500/20 px-4 sm:px-6 py-3">
-      <div className="max-w-5xl mx-auto flex items-center justify-between">
+    <header className="sticky top-0 z-50 w-full px-4 sm:px-6 py-3">
+      <div className="max-w-4xl mx-auto flex items-center justify-between bg-white/95 backdrop-blur-md border-2 border-slate-900 rounded-2xl px-4 py-2.5 shadow-[0_4px_0_#1E293B]">
         <BrandLogo size="md" withSubtitle={false} />
 
         <div className="flex items-center gap-2 sm:gap-3">
@@ -26,27 +26,27 @@ export function Navbar() {
           <button
             onClick={toggleSound}
             aria-label={isMuted ? "Unmute audio effects" : "Mute audio effects"}
-            className="p-2 rounded-xl glass-card text-pink-300 hover:text-white hover:bg-pink-500/20 transition-colors min-touch-target flex items-center justify-center"
+            className="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-900 text-slate-800 transition-colors flex items-center justify-center shadow-[0_2px_0_#1E293B] active:translate-y-0.5 active:shadow-none"
           >
-            {isMuted ? <VolumeX className="w-5 h-5 text-pink-400/60" /> : <Volume2 className="w-5 h-5" />}
+            {isMuted ? <VolumeX className="w-4 h-4 text-slate-400" /> : <Volume2 className="w-4 h-4 text-slate-700" />}
           </button>
 
           {/* Join with Room Code */}
           <Link
             href="/join"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl glass-card text-xs sm:text-sm font-medium text-pink-200 hover:text-white hover:border-pink-500/50 transition-all min-touch-target"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-sky-100 hover:bg-sky-200 border border-slate-900 text-xs sm:text-sm font-bold text-slate-800 shadow-[0_2px_0_#1E293B] active:translate-y-0.5 active:shadow-none transition-all"
           >
-            <LogIn className="w-4 h-4 text-pink-400" />
-            <span className="hidden xs:inline">Join</span> Code
+            <KeyRound className="w-3.5 h-3.5 text-sky-600" />
+            <span className="hidden xs:inline">Join</span> Room
           </Link>
 
-          {/* Create Challenge Button */}
+          {/* Create Quiz Button */}
           <Link
             href="/create"
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white text-xs sm:text-sm font-semibold shadow-md shadow-pink-500/30 transition-all active:scale-95 min-touch-target"
+            className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-yellow-400 hover:bg-yellow-300 border-2 border-slate-900 text-slate-900 text-xs sm:text-sm font-black shadow-[0_3px_0_#1E293B] active:translate-y-0.5 active:shadow-none transition-all"
           >
-            <Sparkles className="w-4 h-4" />
-            <span>Create</span>
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>Create Test</span>
           </Link>
         </div>
       </div>

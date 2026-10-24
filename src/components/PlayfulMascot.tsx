@@ -15,12 +15,12 @@ export function PlayfulMascot({ size = "md", interactive = true }: PlayfulMascot
   const [speech, setSpeech] = useState<string>("Tap us!");
 
   const speechLines = [
-    "Who knows who better?",
-    "No peeking allowed! 🙈",
-    "Are you mind readers? 🔮",
-    "Plot twist incoming! 🍿",
-    "100% Love Sync! 💖",
-    "Besties or soulmates? ✨"
+    "Don't block me! 🙈",
+    "Find your fake friends! 👀",
+    "10/10 or getting blocked! 🚫",
+    "I know all your secrets! 🤫",
+    "Who can you really trust? 🔮",
+    "Safe or Blocked? ⚡"
   ];
 
   const handleClick = () => {
@@ -47,12 +47,12 @@ export function PlayfulMascot({ size = "md", interactive = true }: PlayfulMascot
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, scale: 0.8, y: -5 }}
           transition={{ type: "spring", stiffness: 400, damping: 20 }}
-          className="mb-2 px-3.5 py-1.5 rounded-2xl bg-white/95 text-[#25112F] shadow-lg shadow-pink-500/25 border-2 border-pink-400 text-xs sm:text-sm font-black tracking-tight flex items-center gap-1.5 cursor-pointer"
+          className="mb-2 px-3.5 py-1.5 rounded-2xl bg-white text-slate-900 shadow-[0_3px_0_#1E293B] border-2 border-slate-900 text-xs sm:text-sm font-black tracking-tight flex items-center gap-1.5 cursor-pointer"
           onClick={handleClick}
         >
-          <Sparkles className="w-3.5 h-3.5 text-pink-500" />
+          <Sparkles className="w-3.5 h-3.5 text-yellow-500 fill-yellow-400" />
           <span>{speech}</span>
-          <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-0 h-0 border-x-4 border-x-transparent border-t-8 border-t-pink-400" />
+          <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-0 h-0 border-x-4 border-x-transparent border-t-8 border-t-slate-900" />
         </motion.div>
       </AnimatePresence>
 
