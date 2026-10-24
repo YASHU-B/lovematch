@@ -111,73 +111,77 @@ export function PlayfulMascot({ size = "md", interactive = true }: PlayfulMascot
           </div>
         </motion.div>
 
-        {/* Mascot Characters: Pink Heart & Purple Heart Hugging */}
+        {/* Mascot Characters: Brown Bear & White Panda Duo */}
         <motion.div
           animate={{
-            y: [-4, 4, -4],
-            rotate: [-2, 2, -2]
+            y: [-3, 3, -3],
+            rotate: [-1.5, 1.5, -1.5]
           }}
           transition={{
-            duration: 4,
+            duration: 3.5,
             repeat: Infinity,
             ease: "easeInOut"
           }}
-          className="relative z-10 w-full h-full flex items-center justify-center"
+          className="relative z-10 w-full h-full flex items-center justify-center gap-1 sm:gap-2"
         >
-          <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-2xl">
-            {/* Left Heart: Romantic Pink */}
-            <path
-              d="M32 25 C20 25 10 35 10 48 C10 65 35 80 42 85 C40 75 35 60 40 45 C42 35 38 25 32 25 Z"
-              fill="url(#mascot-pink)"
-            />
-            {/* Right Heart: Midnight Purple / Lavender */}
-            <path
-              d="M68 25 C80 25 90 35 90 48 C90 65 65 80 58 85 C60 75 65 60 60 45 C58 35 62 25 68 25 Z"
-              fill="url(#mascot-purple)"
-            />
-            {/* Center overlap joint */}
-            <path
-              d="M50 36 C42 22 25 25 25 42 C25 60 50 82 50 82 C50 82 75 60 75 42 C75 25 58 22 50 36 Z"
-              fill="url(#mascot-gradient)"
-            />
+          {/* Left: Cute Brown Bear */}
+          <div className="w-1/2 h-full flex items-center justify-center">
+            <svg viewBox="0 0 120 120" className="w-full h-full drop-shadow-lg">
+              {/* Ears */}
+              <circle cx="32" cy="30" r="14" fill="#C68958" stroke="#372013" strokeWidth="3" />
+              <circle cx="32" cy="30" r="8" fill="#F4B785" />
+              <circle cx="88" cy="30" r="14" fill="#C68958" stroke="#372013" strokeWidth="3" />
+              <circle cx="88" cy="30" r="8" fill="#F4B785" />
 
-            {/* Cute Cartoon Eyes (Left Heart) */}
-            <ellipse cx="38" cy="46" rx="3.5" ry="5" fill="#1e0a24" />
-            <circle cx="39.5" cy="44.5" r="1.5" fill="#FFF8FC" />
+              {/* Head */}
+              <rect x="20" y="24" width="80" height="72" rx="36" fill="#D69766" stroke="#372013" strokeWidth="3.5" />
+              <ellipse cx="32" cy="68" rx="7" ry="4.5" fill="#FF8BA7" opacity="0.65" />
+              <ellipse cx="88" cy="68" rx="7" ry="4.5" fill="#FF8BA7" opacity="0.65" />
 
-            {/* Cute Cartoon Eyes (Right Heart) */}
-            <ellipse cx="62" cy="46" rx="3.5" ry="5" fill="#1e0a24" />
-            <circle cx="63.5" cy="44.5" r="1.5" fill="#FFF8FC" />
+              {/* Eyes */}
+              <circle cx="42" cy="56" r="4.5" fill="#25140A" />
+              <circle cx="43.5" cy="54" r="1.5" fill="#FFFFFF" />
+              <circle cx="78" cy="56" r="4.5" fill="#25140A" />
+              <circle cx="79.5" cy="54" r="1.5" fill="#FFFFFF" />
 
-            {/* Rosy Blushing Cheeks */}
-            <circle cx="32" cy="53" r="3.5" fill="#f43f5e" opacity="0.6" />
-            <circle cx="68" cy="53" r="3.5" fill="#f43f5e" opacity="0.6" />
+              {/* Snout */}
+              <ellipse cx="60" cy="65" rx="14" ry="10" fill="#FCEBD9" stroke="#372013" strokeWidth="2.5" />
+              <ellipse cx="60" cy="61" rx="4" ry="3" fill="#25140A" />
+              <path d="M57 66 Q60 69 63 66" stroke="#25140A" strokeWidth="2" strokeLinecap="round" fill="none" />
+            </svg>
+          </div>
 
-            {/* Happy Smiling Mouth */}
-            <path
-              d="M45 53 Q50 58 55 53"
-              stroke="#1e0a24"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              fill="none"
-            />
+          {/* Right: Cute White Panda */}
+          <div className="w-1/2 h-full flex items-center justify-center">
+            <svg viewBox="0 0 120 120" className="w-full h-full drop-shadow-lg">
+              {/* Ears */}
+              <circle cx="32" cy="30" r="14" fill="#2D282A" stroke="#1F1A1C" strokeWidth="3" />
+              <circle cx="32" cy="30" r="7" fill="#4B4447" />
+              <circle cx="88" cy="30" r="14" fill="#2D282A" stroke="#1F1A1C" strokeWidth="3" />
+              <circle cx="88" cy="30" r="7" fill="#4B4447" />
 
-            <defs>
-              <linearGradient id="mascot-pink" x1="10" y1="25" x2="50" y2="85" gradientUnits="userSpaceOnUse">
-                <stop stopColor="#F472B6" />
-                <stop offset="1" stopColor="#EC4899" />
-              </linearGradient>
-              <linearGradient id="mascot-purple" x1="90" y1="25" x2="50" y2="85" gradientUnits="userSpaceOnUse">
-                <stop stopColor="#EC4899" />
-                <stop offset="1" stopColor="#A855F7" />
-              </linearGradient>
-              <linearGradient id="mascot-gradient" x1="25" y1="25" x2="75" y2="85" gradientUnits="userSpaceOnUse">
-                <stop stopColor="#F472B6" />
-                <stop offset="0.5" stopColor="#EC4899" />
-                <stop offset="1" stopColor="#C4B5FD" />
-              </linearGradient>
-            </defs>
-          </svg>
+              {/* Head */}
+              <rect x="20" y="24" width="80" height="72" rx="36" fill="#FFFFFF" stroke="#1F1A1C" strokeWidth="3.5" />
+              <circle cx="32" cy="70" r="7.5" fill="#FF8FA3" opacity="0.8" />
+              <circle cx="88" cy="70" r="7.5" fill="#FF8FA3" opacity="0.8" />
+
+              {/* Eye Patches */}
+              <ellipse cx="42" cy="56" rx="9" ry="11" fill="#2D282A" transform="rotate(-15 42 56)" />
+              <ellipse cx="78" cy="56" rx="9" ry="11" fill="#2D282A" transform="rotate(15 78 56)" />
+              <circle cx="43" cy="55" r="4.5" fill="#FFFFFF" />
+              <circle cx="44" cy="55" r="2.5" fill="#1F1A1C" />
+              <circle cx="77" cy="55" r="4.5" fill="#FFFFFF" />
+              <circle cx="76" cy="55" r="2.5" fill="#1F1A1C" />
+
+              {/* Snout */}
+              <ellipse cx="60" cy="66" rx="3.5" ry="2.5" fill="#2D282A" />
+              <path d="M57 70 Q60 73 63 70" stroke="#2D282A" strokeWidth="2" strokeLinecap="round" fill="none" />
+
+              {/* Paws on cheeks */}
+              <ellipse cx="30" cy="78" rx="8" ry="7" fill="#FFFFFF" stroke="#1F1A1C" strokeWidth="2.5" />
+              <ellipse cx="90" cy="78" rx="8" ry="7" fill="#FFFFFF" stroke="#1F1A1C" strokeWidth="2.5" />
+            </svg>
+          </div>
         </motion.div>
       </motion.div>
     </div>

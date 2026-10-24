@@ -16,11 +16,11 @@ export function Footer() {
 
         {/* Navigation Links */}
         <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs sm:text-sm font-bold text-slate-700">
+          <Link href="/" className="hover:text-pink-600 transition-colors">
+            Home
+          </Link>
           <Link href="/create" className="hover:text-pink-600 transition-colors">
             Create Quiz
-          </Link>
-          <Link href="/join" className="hover:text-pink-600 transition-colors">
-            Join Room
           </Link>
           <Link href="/privacy" className="hover:text-pink-600 transition-colors flex items-center gap-1">
             <ShieldCheck className="w-3.5 h-3.5 text-pink-500" />
@@ -31,7 +31,7 @@ export function Footer() {
           </Link>
           <Link href="/admin" className="hover:text-slate-900 transition-colors flex items-center gap-1 text-slate-400">
             <Lock className="w-3 h-3" />
-            Admin
+            <span>Admin</span>
           </Link>
         </div>
       </div>
@@ -40,7 +40,7 @@ export function Footer() {
         <div className="flex items-center gap-1.5">
           <span>Crafted with</span>
           <Heart className="w-3.5 h-3.5 text-pink-500 fill-pink-500 animate-pulse" />
-          <span>for friends and couples everywhere.</span>
+          <span>for friends everywhere.</span>
         </div>
         <p>© 2026 Don&apos;t Block Me / YouTest. Purely for fun and laughs!</p>
       </div>

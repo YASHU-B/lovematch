@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { BrandLogo } from "./BrandLogo";
-import { Volume2, VolumeX, Sparkles, KeyRound } from "lucide-react";
+import { Volume2, VolumeX, Sparkles } from "lucide-react";
 import { soundEffects } from "./AudioEffects";
 
 export function Navbar() {
@@ -31,22 +31,13 @@ export function Navbar() {
             {isMuted ? <VolumeX className="w-4 h-4 text-slate-400" /> : <Volume2 className="w-4 h-4 text-slate-700" />}
           </button>
 
-          {/* Join with Room Code */}
-          <Link
-            href="/join"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-sky-100 hover:bg-sky-200 border border-slate-900 text-xs sm:text-sm font-bold text-slate-800 shadow-[0_2px_0_#1E293B] active:translate-y-0.5 active:shadow-none transition-all"
-          >
-            <KeyRound className="w-3.5 h-3.5 text-sky-600" />
-            <span className="hidden xs:inline">Join</span> Room
-          </Link>
-
           {/* Create Quiz Button */}
           <Link
             href="/create"
-            className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-yellow-400 hover:bg-yellow-300 border-2 border-slate-900 text-slate-900 text-xs sm:text-sm font-black shadow-[0_3px_0_#1E293B] active:translate-y-0.5 active:shadow-none transition-all"
+            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-yellow-400 hover:bg-yellow-300 border-2 border-slate-900 text-slate-900 text-xs sm:text-sm font-black shadow-[0_3px_0_#1E293B] active:translate-y-0.5 active:shadow-none transition-all"
           >
             <Sparkles className="w-3.5 h-3.5" />
-            <span>Create Test</span>
+            <span>Create Quiz</span>
           </Link>
         </div>
       </div>

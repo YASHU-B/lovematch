@@ -17,6 +17,7 @@ import {
   ArrowRight
 } from "lucide-react";
 import { soundEffects } from "@/components/AudioEffects";
+import { KawaiiBear, KawaiiPanda } from "@/components/KawaiiCharacters";
 
 interface Attempt {
   id: string;
@@ -136,13 +137,20 @@ function ScoreboardContent({
             </div>
           </div>
 
-          <button
-            onClick={handleWhatsAppShare}
-            className="p-2.5 rounded-xl bg-[#25D366] border-2 border-slate-900 text-white shadow-[0_2px_0_#15803d] active:translate-y-0.5 active:shadow-none"
-            title="Share quiz to WhatsApp"
-          >
-            <Share2 className="w-4 h-4" />
-          </button>
+          <div className="flex items-center gap-2">
+            <div className="hidden sm:flex items-center -space-x-2">
+              <KawaiiBear size="sm" mood="happy" className="w-10 h-10" />
+              <KawaiiPanda size="sm" mood="shy" className="w-10 h-10" />
+            </div>
+
+            <button
+              onClick={handleWhatsAppShare}
+              className="p-2.5 rounded-xl bg-[#25D366] border-2 border-slate-900 text-white shadow-[0_2px_0_#15803d] active:translate-y-0.5 active:shadow-none"
+              title="Share quiz to WhatsApp"
+            >
+              <Share2 className="w-4 h-4" />
+            </button>
+          </div>
         </div>
 
         {/* Stats Row */}

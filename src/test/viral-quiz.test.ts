@@ -97,5 +97,31 @@ describe("Don't Block Me — Viral Quiz & Leaderboard System", () => {
     expect(leaderboard.blockedCount).toBe(2);
     expect(leaderboard.attempts[0].friendName).toBe("Maya");
     expect(leaderboard.attempts[0].score).toBe(3);
+
+    // 8. Verify Admin Stats tracking
+    const adminStats = await GameStore.getAdminStats();
+    expect(adminStats.totalQuizzesCreated).toBeGreaterThanOrEqual(1);
+    expect(adminStats.totalMembersPlayed).toBeGreaterThanOrEqual(3);
+    expect(adminStats.activePlayingNow).toBeGreaterThanOrEqual(1);
+    expect(adminStats.recentAttempts.length).toBeGreaterThanOrEqual(3);
+  });
+
+  it("provides 40 real-life questions with 4 options each and random sampler", async () => {
+    const { DONT_BLOCK_ME_QUESTIONS, getRandomQuizQuestions } = await import(
+      "../lib/questions/dontBlockMe"
+    );
+    expect(DONT_BLOCK_ME_QUESTIONS.length).toBeGreaterThanOrEqual(40);
+
+    for (const q of DONT_BLOCK_ME_QUESTIONS) {
+      expect(q.options).toHaveLength(4);
+      expect(q.text.length).toBeGreaterThan(10);
+      expect(q.emoji).toBeTruthy();
+    }
+
+    const randomSample = getRandomQuizQuestions(10);
+    expect(randomSample).toHaveLength(10);
+    const uniqueIds = new Set(randomSample.map((q) => q.id));
+    expect(uniqueIds.size).toBe(10);
   });
 });
+

@@ -2,13 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { 
-  Sparkles, 
-  ArrowRight, 
-  Users, 
-  Play
-} from "lucide-react";
+import { Sparkles, ArrowRight } from "lucide-react";
 import { PlayfulMascot } from "@/components/PlayfulMascot";
 import { soundEffects } from "@/components/AudioEffects";
 
@@ -138,25 +132,6 @@ export default function LandingPage() {
             <span>⚡ Takes 60 seconds</span>
             <span>🔒 100% Free • No Login</span>
           </div>
-        </div>
-
-        {/* Alternative Action: Live 2-Player Duel */}
-        <div className="flex flex-wrap items-center justify-center gap-3">
-          <Link
-            href="/play"
-            className="px-5 py-2.5 rounded-2xl bg-white hover:bg-slate-50 border-2 border-slate-900 text-slate-800 text-xs sm:text-sm font-black shadow-[0_3px_0_#1E293B] active:translate-y-0.5 active:shadow-none transition-all flex items-center gap-2"
-          >
-            <Play className="w-4 h-4 text-pink-500" />
-            <span>Play Live 2-Player Duel</span>
-          </Link>
-
-          <Link
-            href="/join"
-            className="px-5 py-2.5 rounded-2xl bg-sky-100 hover:bg-sky-200 border-2 border-slate-900 text-slate-800 text-xs sm:text-sm font-black shadow-[0_3px_0_#1E293B] active:translate-y-0.5 active:shadow-none transition-all flex items-center gap-2"
-          >
-            <Users className="w-4 h-4 text-sky-600" />
-            <span>Enter Room Code</span>
-          </Link>
         </div>
       </section>
 

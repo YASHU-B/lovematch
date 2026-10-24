@@ -10,12 +10,12 @@ import {
   Copy, 
   Check, 
   Loader2, 
-  Trophy, 
-  RotateCcw,
-  CheckCircle2
+  Trophy
 } from "lucide-react";
-import { DONT_BLOCK_ME_QUESTIONS, DontBlockMeQuestion } from "@/lib/questions/dontBlockMe";
+import { DONT_BLOCK_ME_QUESTIONS, DontBlockMeQuestion, getRandomQuizQuestions } from "@/lib/questions/dontBlockMe";
 import { soundEffects } from "@/components/AudioEffects";
+import { NotebookQuestionCard } from "@/components/NotebookQuestionCard";
+import { GenderSelectionCard } from "@/components/GenderSelectionCard";
 
 function CreateQuizContent() {
   const router = useRouter();
@@ -29,7 +29,16 @@ function CreateQuizContent() {
     }
     return "";
   });
-  const [questions, setQuestions] = useState<DontBlockMeQuestion[]>(() => DONT_BLOCK_ME_QUESTIONS.slice(0, 10));
+
+  const [gender, setGender] = useState<"male" | "female" | null>(() => {
+    if (typeof window !== "undefined") {
+      const savedGender = localStorage.getItem("dont_block_me_gender");
+      if (savedGender === "male" || savedGender === "female") return savedGender;
+    }
+    return null;
+  });
+
+  const [questions, setQuestions] = useState<DontBlockMeQuestion[]>(() => getRandomQuizQuestions(10));
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [currentIdx, setCurrentIdx] = useState(0);
 
@@ -41,6 +50,13 @@ function CreateQuizContent() {
   const totalCount = questions.length;
   const answeredCount = Object.keys(answers).length;
 
+  const handleSelectGender = (chosenGender: "male" | "female") => {
+    setGender(chosenGender);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("dont_block_me_gender", chosenGender);
+    }
+  };
+
   const handleSelectOption = (option: string) => {
     soundEffects.playPop();
     const updated = { ...answers, [currentQ.id]: option };
@@ -50,7 +66,7 @@ function CreateQuizContent() {
     if (currentIdx < totalCount - 1) {
       setTimeout(() => {
         setCurrentIdx(prev => prev + 1);
-      }, 180);
+      }, 200);
     }
   };
 
@@ -152,92 +168,62 @@ function CreateQuizContent() {
     }
   };
 
+  // Step 1: Gender Selection Screen (Screenshot 3)
+  if (!gender && !createdQuiz) {
+    return (
+      <GenderSelectionCard
+        name={creatorName}
+        onChangeName={setCreatorName}
+        selectedGender={gender}
+        onSelectGender={handleSelectGender}
+        onBack={() => router.push("/")}
+      />
+    );
+  }
+
   return (
-    <div className="w-full max-w-lg mx-auto px-4 py-8">
+    <div className="w-full max-w-lg mx-auto px-4 py-6">
       {!createdQuiz ? (
-        <div className="bg-white border-3 border-slate-900 rounded-3xl p-6 sm:p-8 shadow-[0_8px_0_#1E293B]">
-          {/* Header & Name Input */}
-          <div className="mb-6">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-black uppercase tracking-wider text-slate-500">
-                Question {currentIdx + 1} of {totalCount}
-              </span>
-              <span className="text-xs font-black px-2.5 py-0.5 rounded-full bg-yellow-300 border border-slate-900 text-slate-900">
-                Answer Key Mode
-              </span>
-            </div>
-
-            {/* Progress Bar */}
-            <div className="w-full h-3 bg-slate-100 rounded-full border-2 border-slate-900 overflow-hidden mb-4">
-              <div
-                className="h-full bg-yellow-400 transition-all duration-300"
-                style={{ width: `${((currentIdx + 1) / totalCount) * 100}%` }}
-              />
-            </div>
-
-            <div className="mb-4">
-              <label className="block text-[11px] font-black uppercase text-slate-500 mb-1">
-                Your Name
-              </label>
-              <input
-                type="text"
-                value={creatorName}
-                onChange={(e) => setCreatorName(e.target.value)}
-                placeholder="Enter your nickname"
-                className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border-2 border-slate-900 font-bold text-sm text-slate-900 focus:bg-white focus:outline-none"
-              />
-            </div>
+        <div className="space-y-6">
+          {/* Top Progress & Mode Header */}
+          <div className="flex items-center justify-between px-2">
+            <span className="text-xs font-black uppercase tracking-wider text-slate-700">
+              Question {currentIdx + 1} of {totalCount}
+            </span>
+            <span className="text-xs font-black px-3 py-1 rounded-full bg-yellow-300 border border-slate-900 text-slate-900 shadow-xs">
+              Answer Key Mode ✍️
+            </span>
           </div>
 
-          {/* Active Question Box */}
-          <div className="p-5 rounded-2xl bg-sky-50 border-2 border-slate-900 mb-6 relative">
-            <button
-              onClick={handleShuffleCurrent}
-              title="Shuffle question"
-              className="absolute top-3 right-3 text-xs font-bold text-slate-500 hover:text-slate-900 flex items-center gap-1 bg-white px-2 py-1 rounded-lg border border-slate-900 shadow-[0_1.5px_0_#1E293B] active:translate-y-0.5 active:shadow-none"
-            >
-              <RotateCcw className="w-3 h-3" />
-              <span>Change</span>
-            </button>
-
-            <span className="text-4xl block mb-2">{currentQ.emoji}</span>
-            <h3 className="text-lg sm:text-xl font-black text-slate-900 leading-snug">
-              {currentQ.text}
-            </h3>
-            <p className="text-xs font-bold text-sky-700 mt-1">
-              👉 Tap the option that is truly about YOU:
-            </p>
+          {/* Progress Bar */}
+          <div className="w-full h-3 bg-white/70 rounded-full border-2 border-slate-900 overflow-hidden shadow-xs">
+            <div
+              className="h-full bg-yellow-400 transition-all duration-300"
+              style={{ width: `${((currentIdx + 1) / totalCount) * 100}%` }}
+            />
           </div>
 
-          {/* Options */}
-          <div className="space-y-3 mb-6">
-            {currentQ.options.map((opt, i) => {
-              const isSelected = answers[currentQ.id] === opt;
-              return (
-                <button
-                  key={i}
-                  type="button"
-                  onClick={() => handleSelectOption(opt)}
-                  className={`w-full p-4 rounded-2xl border-2 text-left font-bold text-sm sm:text-base flex items-center justify-between transition-all ${
-                    isSelected
-                      ? "bg-yellow-300 border-slate-900 shadow-[0_4px_0_#1E293B] translate-x-1"
-                      : "bg-white border-slate-900 hover:bg-slate-50 shadow-[0_3px_0_#1E293B] active:translate-y-0.5 active:shadow-none"
-                  }`}
-                >
-                  <span className="text-slate-900">{opt}</span>
-                  {isSelected && <CheckCircle2 className="w-5 h-5 text-slate-900 shrink-0" />}
-                </button>
-              );
-            })}
-          </div>
+          {/* The Iconic Notebook Question Card & Options (Screenshots 1 & 2) */}
+          <NotebookQuestionCard
+            questionNumber={currentIdx + 1}
+            totalQuestions={totalCount}
+            creatorName={creatorName}
+            questionText={currentQ.text}
+            emoji={currentQ.emoji}
+            options={currentQ.options}
+            selectedOption={answers[currentQ.id]}
+            onSelectOption={handleSelectOption}
+            onShuffle={handleShuffleCurrent}
+            isCreatorMode={true}
+          />
 
-          {/* Navigation Controls */}
-          <div className="flex items-center justify-between gap-3 pt-3 border-t border-slate-200">
+          {/* Bottom Navigation Buttons */}
+          <div className="flex items-center justify-between gap-3 pt-2">
             <button
               type="button"
               disabled={currentIdx === 0}
               onClick={() => setCurrentIdx(prev => Math.max(0, prev - 1))}
-              className="px-4 py-2.5 rounded-xl border-2 border-slate-900 bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed text-xs font-bold text-slate-700 shadow-[0_2px_0_#1E293B] active:translate-y-0.5 active:shadow-none flex items-center gap-1"
+              className="px-4 py-2.5 rounded-2xl border-2 border-slate-900 bg-white disabled:opacity-40 disabled:cursor-not-allowed text-xs font-bold text-slate-700 shadow-[0_2px_0_#1E293B] active:translate-y-0.5 active:shadow-none flex items-center gap-1"
             >
               <ArrowLeft className="w-4 h-4" />
               <span>Prev</span>
@@ -247,7 +233,7 @@ function CreateQuizContent() {
               <button
                 type="button"
                 onClick={() => setCurrentIdx(prev => Math.min(totalCount - 1, prev + 1))}
-                className="px-5 py-2.5 rounded-xl border-2 border-slate-900 bg-sky-200 text-xs font-black text-slate-900 shadow-[0_2px_0_#1E293B] active:translate-y-0.5 active:shadow-none flex items-center gap-1"
+                className="px-5 py-2.5 rounded-2xl border-2 border-slate-900 bg-sky-200 text-xs font-black text-slate-900 shadow-[0_2px_0_#1E293B] active:translate-y-0.5 active:shadow-none flex items-center gap-1"
               >
                 <span>Next</span>
                 <ArrowRight className="w-4 h-4" />
@@ -257,7 +243,7 @@ function CreateQuizContent() {
                 type="button"
                 disabled={isSubmitting || answeredCount < totalCount}
                 onClick={handleFinishQuiz}
-                className="px-6 py-3 rounded-xl border-2.5 border-slate-900 bg-yellow-400 hover:bg-yellow-300 disabled:opacity-50 text-xs sm:text-sm font-black text-slate-900 shadow-[0_4px_0_#CA8A04] active:translate-y-1 active:shadow-none transition-all flex items-center gap-2"
+                className="px-6 py-3 rounded-2xl border-2.5 border-slate-900 bg-yellow-400 hover:bg-yellow-300 disabled:opacity-50 text-xs sm:text-sm font-black text-slate-900 shadow-[0_4px_0_#CA8A04] active:translate-y-1 active:shadow-none transition-all flex items-center gap-2"
               >
                 {isSubmitting ? (
                   <>
@@ -285,7 +271,7 @@ function CreateQuizContent() {
             Your Test is Ready!
           </h2>
           <p className="text-xs sm:text-sm font-bold text-slate-600 mb-6">
-            Share this link with your friends on WhatsApp, Snapchat, or Instagram Story. See who gets 10/10 and who gets blocked!
+            Share this link with your friends on WhatsApp, Snapchat, or Instagram Story. See who knows you best and who gets blocked!
           </p>
 
           {/* Sharing Buttons */}

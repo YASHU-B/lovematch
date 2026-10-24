@@ -1,351 +1,421 @@
 "use client";
 
-import React, { useState } from "react";
-import { Question, CATEGORIES } from "@/lib/questions/data";
+import React, { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
 import { 
+  Users, 
+  Sparkles, 
+  ShieldCheck, 
+  Activity, 
+  RotateCw, 
   Lock, 
-  Plus, 
-  Trash2, 
-  Download, 
-  AlertCircle, 
-  Loader2, 
-  Search
+  KeyRound, 
+  ExternalLink,
+  ArrowRight
 } from "lucide-react";
+import { soundEffects } from "@/components/AudioEffects";
 
-export default function AdminPage() {
-  const [adminKey, setAdminKey] = useState("");
+interface AdminStats {
+  totalQuizzesCreated: number;
+  totalMembersPlayed: number;
+  activePlayingNow: number;
+  safeCount: number;
+  warningCount: number;
+  blockedCount: number;
+  safeRate: number;
+  recentQuizzes: {
+    id: string;
+    creatorName: string;
+    createdAt: string;
+    attemptsCount: number;
+    safeCount: number;
+    blockedCount: number;
+  }[];
+  recentAttempts: {
+    id: string;
+    quizId: string;
+    friendName: string;
+    score: number;
+    total: number;
+    verdict: "safe" | "warning" | "blocked";
+    createdAt: string;
+  }[];
+}
+
+export default function AdminDashboardPage() {
+  const [passcode, setPasscode] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      return sessionStorage.getItem("admin_passcode") || "";
+    }
+    return "";
+  });
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [questions, setQuestions] = useState<Question[]>([]);
+  const [authError, setAuthError] = useState<string | null>(null);
+
+  const [stats, setStats] = useState<AdminStats | null>(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [autoRefresh, setAutoRefresh] = useState(true);
 
-  // Filter & Search
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
-  const [searchQuery, setSearchQuery] = useState("");
-
-  // New question form state
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [newPrompt, setNewPrompt] = useState("");
-  const [newCategory, setNewCategory] = useState(CATEGORIES[0].id);
-  const [newOptionsText, setNewOptionsText] = useState("");
-  const [savingQuestion, setSavingQuestion] = useState(false);
-
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!adminKey.trim()) return;
-
-    setLoading(true);
-    setError(null);
-
+  const fetchStats = useCallback(async (key: string) => {
     try {
-      const res = await fetch(`/api/admin/questions`, {
-        headers: { "x-admin-key": adminKey.trim() }
-      });
+      const res = await fetch(`/api/admin/stats?key=${encodeURIComponent(key)}`);
+      const data = await res.json();
+      if (res.ok && data.stats) {
+        setStats(data.stats);
+        setLastUpdated(new Date());
+      }
+    } catch {
+      // Background poll failure
+    }
+  }, []);
 
+  const verifyAndFetch = useCallback(async (key: string) => {
+    setLoading(true);
+    setAuthError(null);
+    try {
+      const res = await fetch(`/api/admin/stats?key=${encodeURIComponent(key)}`);
       const data = await res.json();
       if (!res.ok || data.error) {
-        throw new Error(data.error || "Authentication failed");
+        throw new Error(data.error || "Invalid admin key");
       }
-
-      setQuestions(data.questions);
       setIsAuthenticated(true);
+      setStats(data.stats);
+      setLastUpdated(new Date());
+      if (typeof window !== "undefined") {
+        sessionStorage.setItem("admin_passcode", key);
+      }
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Failed to authenticate");
+      setAuthError(err instanceof Error ? err.message : "Authentication failed");
+      setIsAuthenticated(false);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const handleCreateQuestion = async (e: React.FormEvent) => {
+  // Check if initial admin passcode was found in session storage
+  useEffect(() => {
+    if (!passcode) return;
+    const timer = setTimeout(() => {
+      void verifyAndFetch(passcode);
+    }, 10);
+    return () => clearTimeout(timer);
+  }, [passcode, verifyAndFetch]);
+
+  // Auto-refresh interval (every 10 seconds)
+  useEffect(() => {
+    if (!isAuthenticated || !autoRefresh || !passcode) return;
+    const interval = setInterval(() => {
+      void fetchStats(passcode);
+    }, 10000);
+    return () => clearInterval(interval);
+  }, [isAuthenticated, autoRefresh, passcode, fetchStats]);
+
+  const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    const optionsArray = newOptionsText
-      .split("\n")
-      .map(s => s.trim())
-      .filter(Boolean);
-
-    if (optionsArray.length < 2) {
-      setError("Please provide at least 2 answer options (one per line).");
-      return;
-    }
-
-    setSavingQuestion(true);
-    setError(null);
-
-    try {
-      const res = await fetch(`/api/admin/questions`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-admin-key": adminKey.trim()
-        },
-        body: JSON.stringify({
-          category: newCategory,
-          prompt: newPrompt.trim(),
-          options: optionsArray,
-          isActive: true
-        })
-      });
-
-      const data = await res.json();
-      if (!res.ok || data.error) {
-        throw new Error(data.error || "Failed to create question");
-      }
-
-      setQuestions([data.question, ...questions]);
-      setShowAddModal(false);
-      setNewPrompt("");
-      setNewOptionsText("");
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Error creating question");
-    } finally {
-      setSavingQuestion(false);
-    }
+    if (!passcode.trim()) return;
+    soundEffects.playPop();
+    void verifyAndFetch(passcode.trim());
   };
 
-  const handleDeactivate = async (id: string) => {
-    try {
-      const res = await fetch(`/api/admin/questions?id=${id}`, {
-        method: "DELETE",
-        headers: { "x-admin-key": adminKey.trim() }
-      });
-
-      if (!res.ok) throw new Error("Failed to deactivate");
-
-      setQuestions(questions.map(q => q.id === id ? { ...q, isActive: false } : q));
-    } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : "Failed to deactivate");
-    }
+  const handleManualRefresh = () => {
+    soundEffects.playPop();
+    void fetchStats(passcode);
   };
 
-  const exportQuestionsJSON = () => {
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(questions, null, 2));
-    const downloadAnchor = document.createElement("a");
-    downloadAnchor.setAttribute("href", dataStr);
-    downloadAnchor.setAttribute("download", `lovematch_questions_${Date.now()}.json`);
-    document.body.appendChild(downloadAnchor);
-    downloadAnchor.click();
-    downloadAnchor.remove();
-  };
-
-  const filteredQuestions = questions.filter(q => {
-    const matchesCategory = selectedCategory === "all" || q.category === selectedCategory;
-    const matchesSearch = !searchQuery || q.prompt.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
-  });
-
-  return (
-    <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-      {!isAuthenticated ? (
-        /* Login Screen */
-        <div className="max-w-md mx-auto glass-panel rounded-3xl p-8 border border-pink-500/30 shadow-2xl text-center">
-          <div className="w-12 h-12 mx-auto rounded-2xl bg-pink-500/20 border border-pink-500/30 flex items-center justify-center text-pink-400 mb-4">
-            <Lock className="w-6 h-6" />
+  if (!isAuthenticated) {
+    return (
+      <div className="w-full max-w-md mx-auto px-4 py-16">
+        <div className="bg-white border-3 border-slate-900 rounded-3xl p-6 sm:p-8 shadow-[0_8px_0_#1E293B] text-center">
+          <div className="w-16 h-16 mx-auto rounded-3xl bg-yellow-300 border-2.5 border-slate-900 flex items-center justify-center text-3xl mb-4 shadow-[0_3px_0_#1E293B]">
+            <Lock className="w-8 h-8 text-slate-900" />
           </div>
-          <h1 className="text-2xl font-black text-white tracking-tight mb-2">
-            Admin Dashboard
+
+          <h1 className="text-2xl font-black text-slate-900 tracking-tight mb-2">
+            Admin Metrics Access
           </h1>
-          <p className="text-xs text-pink-200/80 mb-6">
-            Enter the admin secret key to manage question banks, categories, and review stats.
+          <p className="text-xs font-bold text-slate-500 mb-6">
+            Enter the admin passcode to track members played, active players, and quiz logs.
           </p>
 
-          {error && (
-            <div className="mb-4 p-3 rounded-xl bg-rose-500/20 border border-rose-500/40 text-rose-200 text-xs flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 shrink-0" />
-              <span>{error}</span>
+          {authError && (
+            <div className="mb-4 p-3 rounded-xl bg-rose-50 border-2 border-rose-300 text-rose-700 text-xs font-bold">
+              {authError} (Hint: default is admin2026)
             </div>
           )}
 
           <form onSubmit={handleLogin} className="space-y-4">
-            <input
-              type="password"
-              required
-              value={adminKey}
-              onChange={(e) => setAdminKey(e.target.value)}
-              placeholder="Admin Secret Key"
-              className="w-full px-4 py-3.5 rounded-2xl glass-card border border-pink-500/30 text-white text-sm focus:border-pink-500 focus:outline-none"
-            />
+            <div className="relative">
+              <input
+                type="password"
+                required
+                value={passcode}
+                onChange={(e) => setPasscode(e.target.value)}
+                placeholder="Enter admin passcode"
+                className="w-full pl-10 pr-4 py-3 rounded-2xl bg-slate-50 border-2 border-slate-900 font-bold text-sm text-slate-900 focus:bg-white focus:outline-none"
+              />
+              <KeyRound className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
+            </div>
+
             <button
               type="submit"
-              disabled={loading}
-              className="w-full min-touch-target flex items-center justify-center gap-2 py-4 rounded-2xl bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 text-white font-extrabold text-sm shadow-xl shadow-pink-500/35 transition-transform active:scale-95 disabled:opacity-50"
+              disabled={loading || !passcode.trim()}
+              className="w-full py-3.5 rounded-2xl bg-yellow-400 hover:bg-yellow-300 disabled:opacity-50 border-2.5 border-slate-900 text-slate-900 font-black text-sm shadow-[0_4px_0_#CA8A04] active:translate-y-1 active:shadow-none transition-all flex items-center justify-center gap-2"
             >
-              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <span>Access Dashboard</span>}
+              <span>{loading ? "Checking Access..." : "Unlock Dashboard"}</span>
+              <ArrowRight className="w-4 h-4" />
             </button>
           </form>
-          <div className="mt-4 text-[11px] text-pink-300/60">
-            Default local key: <code className="text-pink-300">lovematch-admin-2026</code>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 py-8">
+      {/* Header Bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white border-3 border-slate-900 rounded-3xl p-6 shadow-[0_6px_0_#1E293B] mb-6">
+        <div>
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-black text-slate-900">
+              Admin Analytics & Member Tracker
+            </h1>
+            <span className="px-2.5 py-0.5 rounded-full bg-emerald-300 border border-slate-900 text-[10px] font-black text-slate-900 uppercase">
+              LIVE
+            </span>
+          </div>
+          <p className="text-xs font-bold text-slate-500 mt-1">
+            Real-time tracking of created tests, players, and active member engagement.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setAutoRefresh(!autoRefresh)}
+            className={`px-3 py-1.5 rounded-xl border border-slate-900 text-xs font-bold transition-all ${
+              autoRefresh 
+                ? "bg-emerald-100 text-emerald-800 border-emerald-500" 
+                : "bg-slate-100 text-slate-600"
+            }`}
+          >
+            Auto-refresh: {autoRefresh ? "ON (10s)" : "OFF"}
+          </button>
+
+          <button
+            onClick={handleManualRefresh}
+            className="p-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 border-2 border-slate-900 text-slate-800 shadow-[0_2px_0_#1E293B] active:translate-y-0.5 active:shadow-none"
+            title="Refresh now"
+          >
+            <RotateCw className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+
+      {/* KPI Metrics Grid */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        {/* Total Members Played */}
+        <div className="bg-white border-3 border-slate-900 rounded-3xl p-5 shadow-[0_6px_0_#1E293B]">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[11px] font-black uppercase tracking-wider text-slate-500">
+              Members Played
+            </span>
+            <Users className="w-4 h-4 text-sky-600" />
+          </div>
+          <div className="text-3xl font-black text-slate-900">
+            {stats?.totalMembersPlayed ?? 0}
+          </div>
+          <div className="text-[11px] font-bold text-slate-500 mt-1 flex items-center gap-1.5">
+            <span className="text-emerald-600">{stats?.safeCount ?? 0} Safe</span>
+            <span>•</span>
+            <span className="text-rose-500">{stats?.blockedCount ?? 0} Blocked</span>
           </div>
         </div>
-      ) : (
-        /* Authenticated Admin Management */
-        <div className="space-y-6">
-          {/* Header Stats */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 glass-panel rounded-3xl p-6 border border-pink-500/30">
-            <div>
-              <h1 className="text-2xl font-black text-white">Question Management</h1>
-              <p className="text-xs text-pink-200/80 mt-0.5">
-                Total: <strong className="text-white">{questions.length}</strong> questions | Active: <strong className="text-emerald-400">{questions.filter(q => q.isActive).length}</strong>
+
+        {/* Currently Playing / Active */}
+        <div className="bg-white border-3 border-slate-900 rounded-3xl p-5 shadow-[0_6px_0_#1E293B] relative overflow-hidden">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[11px] font-black uppercase tracking-wider text-slate-500">
+              Playing Now
+            </span>
+            <span className="relative flex h-3 w-3">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500" />
+            </span>
+          </div>
+          <div className="text-3xl font-black text-emerald-600">
+            {stats?.activePlayingNow ?? 0}
+          </div>
+          <div className="text-[11px] font-bold text-slate-500 mt-1">
+            Active in last 30 minutes
+          </div>
+        </div>
+
+        {/* Total Quizzes Created */}
+        <div className="bg-white border-3 border-slate-900 rounded-3xl p-5 shadow-[0_6px_0_#1E293B]">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[11px] font-black uppercase tracking-wider text-slate-500">
+              Tests Created
+            </span>
+            <Sparkles className="w-4 h-4 text-yellow-500 fill-yellow-400" />
+          </div>
+          <div className="text-3xl font-black text-slate-900">
+            {stats?.totalQuizzesCreated ?? 0}
+          </div>
+          <div className="text-[11px] font-bold text-slate-500 mt-1">
+            Unique quizzes generated
+          </div>
+        </div>
+
+        {/* Safe / Bestie Rate */}
+        <div className="bg-white border-3 border-slate-900 rounded-3xl p-5 shadow-[0_6px_0_#1E293B]">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[11px] font-black uppercase tracking-wider text-slate-500">
+              Bestie Rate
+            </span>
+            <ShieldCheck className="w-4 h-4 text-emerald-600" />
+          </div>
+          <div className="text-3xl font-black text-slate-900">
+            {stats?.safeRate ?? 0}%
+          </div>
+          <div className="text-[11px] font-bold text-slate-500 mt-1">
+            Survived without blocking
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content Layout: Live Activity Stream & Recent Quizzes */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Live Members Activity Stream */}
+        <div className="bg-white border-3 border-slate-900 rounded-3xl p-6 shadow-[0_6px_0_#1E293B]">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-base font-black text-slate-900 flex items-center gap-2">
+              <Activity className="w-4 h-4 text-pink-500" />
+              <span>Live Player Activity Stream</span>
+            </h2>
+            <span className="text-xs font-bold text-slate-400">
+              Latest {stats?.recentAttempts.length ?? 0}
+            </span>
+          </div>
+
+          <div className="space-y-2.5 max-h-[420px] overflow-y-auto pr-1">
+            {!stats?.recentAttempts || stats.recentAttempts.length === 0 ? (
+              <p className="text-xs font-bold text-slate-500 py-6 text-center">
+                No players have completed a test yet.
               </p>
-            </div>
-
-            <div className="flex items-center gap-2 w-full sm:w-auto">
-              <button
-                onClick={() => setShowAddModal(true)}
-                className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-pink-500 hover:bg-pink-600 text-white text-xs font-bold transition-all shadow-md shadow-pink-500/30"
-              >
-                <Plus className="w-4 h-4" />
-                <span>Add Question</span>
-              </button>
-              <button
-                onClick={exportQuestionsJSON}
-                className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl glass-card text-pink-200 hover:text-white text-xs font-semibold"
-              >
-                <Download className="w-4 h-4 text-pink-400" />
-                <span className="hidden xs:inline">Export</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Filter Bar */}
-          <div className="flex flex-col sm:flex-row gap-3">
-            <div className="relative flex-1">
-              <input
-                type="text"
-                placeholder="Search question prompts..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-4 py-2.5 rounded-xl glass-card border border-pink-500/20 text-white text-xs placeholder:text-pink-300/40 focus:outline-none focus:border-pink-500"
-              />
-              <Search className="w-4 h-4 text-pink-400 absolute left-3 top-3" />
-            </div>
-
-            <select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="px-3 py-2.5 rounded-xl glass-card border border-pink-500/20 text-xs text-white bg-[#25112F]"
-            >
-              <option value="all">All Categories</option>
-              {CATEGORIES.map(c => (
-                <option key={c.id} value={c.id}>{c.name}</option>
-              ))}
-            </select>
-          </div>
-
-          {/* Questions List */}
-          <div className="space-y-3">
-            {filteredQuestions.map((q) => (
-              <div
-                key={q.id}
-                className={`p-4 rounded-2xl border transition-all ${
-                  q.isActive
-                    ? "glass-card border-pink-500/20"
-                    : "glass-card border-rose-500/20 opacity-50"
-                }`}
-              >
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <div className="flex items-center gap-2 mb-1.5">
-                      <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-pink-500/20 text-pink-300">
-                        {q.category}
-                      </span>
-                      <span className="text-[10px] text-pink-300/60 font-mono">ID: {q.id}</span>
-                      {!q.isActive && (
-                        <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300">
-                          Inactive
-                        </span>
-                      )}
+            ) : (
+              stats.recentAttempts.map((att) => {
+                const isSafe = att.verdict === "safe";
+                const isWarning = att.verdict === "warning";
+                return (
+                  <div
+                    key={att.id}
+                    className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border-2 border-slate-900"
+                  >
+                    <div>
+                      <div className="font-black text-xs text-slate-900 flex items-center gap-1.5">
+                        <span>{att.friendName}</span>
+                        <span className="text-slate-400 font-normal">tested on</span>
+                        <Link
+                          href={`/quiz/${att.quizId}/scores`}
+                          className="font-mono text-sky-600 hover:underline"
+                        >
+                          #{att.quizId}
+                        </Link>
+                      </div>
+                      <div className="text-[10px] font-bold text-slate-400">
+                        {new Date(att.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                      </div>
                     </div>
-                    <h3 className="text-sm font-bold text-white mb-2">{q.prompt}</h3>
-                    <div className="flex flex-wrap gap-1.5">
-                      {q.options.map((opt, i) => (
-                        <span key={i} className="text-[11px] px-2 py-1 rounded-lg bg-pink-500/10 text-pink-200 border border-pink-500/15">
-                          {opt}
-                        </span>
-                      ))}
+
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono font-black text-xs text-slate-700">
+                        {att.score}/{att.total}
+                      </span>
+                      <span
+                        className={`px-2 py-0.5 rounded-full text-[10px] font-black border border-slate-900 ${
+                          isSafe
+                            ? "bg-emerald-300 text-slate-900"
+                            : isWarning
+                            ? "bg-yellow-300 text-slate-900"
+                            : "bg-rose-400 text-white"
+                        }`}
+                      >
+                        {isSafe ? "SAFE 💖" : isWarning ? "THIN ICE ⚠️" : "BLOCKED 🚫"}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </div>
+
+        {/* Created Quizzes & Direct Links */}
+        <div className="bg-white border-3 border-slate-900 rounded-3xl p-6 shadow-[0_6px_0_#1E293B]">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-base font-black text-slate-900 flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-yellow-500 fill-yellow-400" />
+              <span>Created Quizzes Overview</span>
+            </h2>
+            <span className="text-xs font-bold text-slate-400">
+              Latest {stats?.recentQuizzes.length ?? 0}
+            </span>
+          </div>
+
+          <div className="space-y-2.5 max-h-[420px] overflow-y-auto pr-1">
+            {!stats?.recentQuizzes || stats.recentQuizzes.length === 0 ? (
+              <p className="text-xs font-bold text-slate-500 py-6 text-center">
+                No tests created yet.
+              </p>
+            ) : (
+              stats.recentQuizzes.map((q) => (
+                <div
+                  key={q.id}
+                  className="p-3.5 rounded-2xl bg-slate-50 border-2 border-slate-900 flex items-center justify-between gap-2"
+                >
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono font-black text-xs text-slate-900">
+                        #{q.id}
+                      </span>
+                      <span className="font-bold text-xs text-slate-800">
+                        by {q.creatorName}
+                      </span>
+                    </div>
+                    <div className="text-[10px] font-bold text-slate-500 mt-0.5">
+                      {q.attemptsCount} members played ({q.safeCount} safe, {q.blockedCount} blocked)
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-1 shrink-0">
-                    {q.isActive && (
-                      <button
-                        onClick={() => handleDeactivate(q.id)}
-                        title="Deactivate Question"
-                        className="p-2 rounded-lg text-rose-400 hover:bg-rose-500/20 transition-colors"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    )}
+                  <div className="flex items-center gap-2">
+                    <Link
+                      href={`/quiz/${q.id}`}
+                      target="_blank"
+                      className="px-2.5 py-1 rounded-xl bg-white border border-slate-900 text-[11px] font-bold text-slate-800 hover:bg-slate-100 flex items-center gap-1 shadow-[0_1.5px_0_#1E293B]"
+                    >
+                      <span>Take</span>
+                      <ExternalLink className="w-3 h-3 text-slate-500" />
+                    </Link>
+
+                    <Link
+                      href={`/quiz/${q.id}/scores`}
+                      target="_blank"
+                      className="px-2.5 py-1 rounded-xl bg-yellow-300 border border-slate-900 text-[11px] font-black text-slate-900 hover:bg-yellow-200 flex items-center gap-1 shadow-[0_1.5px_0_#1E293B]"
+                    >
+                      <span>Scores</span>
+                      <ExternalLink className="w-3 h-3 text-slate-700" />
+                    </Link>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
+        </div>
+      </div>
 
-          {/* Add Question Modal */}
-          {showAddModal && (
-            <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
-              <div className="w-full max-w-lg glass-panel rounded-3xl p-6 border-2 border-pink-500/40 shadow-2xl">
-                <h2 className="text-xl font-bold text-white mb-4">Add New Question</h2>
-                <form onSubmit={handleCreateQuestion} className="space-y-4">
-                  <div>
-                    <label className="block text-xs font-bold text-pink-300 uppercase mb-1">Category</label>
-                    <select
-                      value={newCategory}
-                      onChange={(e) => setNewCategory(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl glass-card text-xs text-white bg-[#25112F]"
-                    >
-                      {CATEGORIES.map(c => (
-                        <option key={c.id} value={c.id}>{c.name}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-pink-300 uppercase mb-1">Prompt</label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="e.g. What is your partner's dream weekend getaway?"
-                      value={newPrompt}
-                      onChange={(e) => setNewPrompt(e.target.value)}
-                      className="w-full px-3 py-2.5 rounded-xl glass-card text-xs text-white"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-pink-300 uppercase mb-1">
-                      Options (1 option per line)
-                    </label>
-                    <textarea
-                      required
-                      rows={4}
-                      placeholder="Mountain Cabin&#10;Beach Resort&#10;Cozy Staycation&#10;Road Trip"
-                      value={newOptionsText}
-                      onChange={(e) => setNewOptionsText(e.target.value)}
-                      className="w-full px-3 py-2.5 rounded-xl glass-card text-xs text-white font-sans"
-                    />
-                  </div>
-
-                  <div className="flex items-center justify-end gap-2 pt-2">
-                    <button
-                      type="button"
-                      onClick={() => setShowAddModal(false)}
-                      className="px-4 py-2 rounded-xl text-xs text-pink-200 hover:text-white"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      disabled={savingQuestion}
-                      className="px-5 py-2.5 rounded-xl bg-pink-500 hover:bg-pink-600 text-white font-bold text-xs"
-                    >
-                      {savingQuestion ? "Saving..." : "Save Question"}
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          )}
+      {lastUpdated && (
+        <div className="text-center text-[11px] font-bold text-slate-400 mt-6">
+          Last synchronized: {lastUpdated.toLocaleTimeString()}
         </div>
       )}
     </div>

@@ -6,10 +6,11 @@ import {
   ArrowRight, 
   Loader2, 
   AlertCircle, 
-  CheckCircle2, 
   ArrowLeft 
 } from "lucide-react";
 import { soundEffects } from "@/components/AudioEffects";
+import { NotebookQuestionCard } from "@/components/NotebookQuestionCard";
+import { KawaiiBear, KawaiiPanda, WavyUnderline } from "@/components/KawaiiCharacters";
 
 interface QuizQuestion {
   id: string;
@@ -69,7 +70,7 @@ function QuizTakingContent({
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-3">
-        <div className="w-14 h-14 rounded-2xl bg-white border-2 border-slate-900 shadow-[0_4px_0_#1E293B] flex items-center justify-center text-2xl animate-bounce">
+        <div className="w-16 h-16 rounded-3xl bg-white border-2 border-slate-900 shadow-[0_4px_0_#1E293B] flex items-center justify-center text-3xl animate-bounce">
           ☁️
         </div>
         <p className="text-sm font-black text-slate-800">Loading quiz...</p>
@@ -119,7 +120,7 @@ function QuizTakingContent({
     if (currentIdx < totalCount - 1) {
       setTimeout(() => {
         setCurrentIdx(prev => prev + 1);
-      }, 160);
+      }, 180);
     } else {
       // Last question answered - submit directly!
       await submitAttempt(updatedAnswers);
@@ -156,19 +157,26 @@ function QuizTakingContent({
   };
 
   return (
-    <div className="w-full max-w-lg mx-auto px-4 py-8">
+    <div className="w-full max-w-lg mx-auto px-4 py-6">
       {!hasStarted ? (
         /* Welcome / Name Screen */
         <div className="bg-white border-3 border-slate-900 rounded-3xl p-6 sm:p-8 shadow-[0_8px_0_#1E293B] text-center">
-          <div className="w-16 h-16 mx-auto rounded-3xl bg-pink-300 border-2.5 border-slate-900 flex items-center justify-center text-3xl mb-4 shadow-[0_4px_0_#1E293B]">
-            👀
+          {/* Mascot Welcome Duo */}
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <KawaiiBear size="md" mood="cute" />
+            <KawaiiPanda size="md" mood="happy" />
           </div>
 
           <span className="text-xs font-black uppercase tracking-wider text-pink-600 block mb-1">
             Friendship Test
           </span>
           <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mb-2">
-            How Well Do You Know <span className="text-pink-600">{quiz.creatorName}</span>?
+            How Well Do You Know{" "}
+            <span className="text-pink-600 relative inline-block">
+              {quiz.creatorName}
+              <WavyUnderline color="pink" className="absolute -bottom-1 left-0 w-full h-2" />
+            </span>
+            ?
           </h1>
           <p className="text-xs sm:text-sm font-bold text-slate-600 mb-6">
             Answer {totalCount} questions. Get a high score to prove you&apos;re a real bestie... or get <span className="text-rose-600 font-black">BLOCKED! 🚫</span>
@@ -186,7 +194,7 @@ function QuizTakingContent({
                 value={friendName}
                 onChange={(e) => setFriendName(e.target.value)}
                 placeholder="e.g. Maya or Chris"
-                className="w-full px-4 py-3.5 rounded-2xl bg-sky-50 border-2 border-slate-900 font-bold text-base text-slate-900 focus:bg-white focus:outline-none"
+                className="w-full px-4 py-3.5 rounded-2xl bg-sky-50 border-2 border-slate-900 font-bold text-base text-slate-900 focus:bg-white focus:outline-none shadow-inner"
               />
             </div>
 
@@ -205,79 +213,56 @@ function QuizTakingContent({
           </p>
         </div>
       ) : (
-        /* Quiz Question Screen */
-        <div className="bg-white border-3 border-slate-900 rounded-3xl p-6 sm:p-8 shadow-[0_8px_0_#1E293B]">
+        /* Quiz Question Screen with NotebookQuestionCard */
+        <div className="space-y-6">
           {/* Progress Header */}
-          <div className="mb-6">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-black uppercase tracking-wider text-slate-500">
-                Question {currentIdx + 1} of {totalCount}
-              </span>
-              <span className="text-xs font-black px-2.5 py-0.5 rounded-full bg-pink-200 border border-slate-900 text-slate-900">
-                Guessing {quiz.creatorName}&apos;s Choice
-              </span>
-            </div>
-
-            {/* Progress Bar */}
-            <div className="w-full h-3 bg-slate-100 rounded-full border-2 border-slate-900 overflow-hidden">
-              <div
-                className="h-full bg-pink-400 transition-all duration-300"
-                style={{ width: `${((currentIdx + 1) / totalCount) * 100}%` }}
-              />
-            </div>
+          <div className="flex items-center justify-between px-2">
+            <span className="text-xs font-black uppercase tracking-wider text-slate-700">
+              Question {currentIdx + 1} of {totalCount}
+            </span>
+            <span className="text-xs font-black px-3 py-1 rounded-full bg-pink-200 border border-slate-900 text-slate-900 shadow-xs">
+              Guessing {quiz.creatorName}&apos;s Choice 👀
+            </span>
           </div>
 
-          {/* Question Box */}
-          <div className="p-5 rounded-2xl bg-sky-50 border-2 border-slate-900 mb-6">
-            <span className="text-4xl block mb-2">{currentQ.emoji}</span>
-            <h2 className="text-lg sm:text-xl font-black text-slate-900 leading-snug">
-              {currentQ.text}
-            </h2>
-            <p className="text-xs font-bold text-slate-500 mt-1">
-              What would <span className="font-black text-slate-800">{quiz.creatorName}</span> pick?
-            </p>
+          {/* Progress Bar */}
+          <div className="w-full h-3 bg-white/70 rounded-full border-2 border-slate-900 overflow-hidden shadow-xs">
+            <div
+              className="h-full bg-pink-400 transition-all duration-300"
+              style={{ width: `${((currentIdx + 1) / totalCount) * 100}%` }}
+            />
           </div>
 
-          {/* Options */}
-          <div className="space-y-3 mb-6">
-            {currentQ.options.map((opt, i) => {
-              const isSelected = answers[currentQ.id] === opt;
-              return (
-                <button
-                  key={i}
-                  type="button"
-                  disabled={isSubmitting}
-                  onClick={() => handleSelectAnswer(opt)}
-                  className={`w-full p-4 rounded-2xl border-2 text-left font-bold text-sm sm:text-base flex items-center justify-between transition-all ${
-                    isSelected
-                      ? "bg-yellow-300 border-slate-900 shadow-[0_4px_0_#1E293B] translate-x-1"
-                      : "bg-white border-slate-900 hover:bg-slate-50 shadow-[0_3px_0_#1E293B] active:translate-y-0.5 active:shadow-none"
-                  }`}
-                >
-                  <span className="text-slate-900">{opt}</span>
-                  {isSelected && <CheckCircle2 className="w-5 h-5 text-slate-900 shrink-0" />}
-                </button>
-              );
-            })}
-          </div>
+          {/* Torn Notebook Paper Card with 3D Options */}
+          <NotebookQuestionCard
+            questionNumber={currentIdx + 1}
+            totalQuestions={totalCount}
+            creatorName={quiz.creatorName}
+            questionText={currentQ.text}
+            emoji={currentQ.emoji}
+            options={currentQ.options}
+            selectedOption={answers[currentQ.id]}
+            onSelectOption={handleSelectAnswer}
+            isCreatorMode={false}
+          />
 
-          {/* Prev button if needed */}
+          {/* Navigation Controls */}
           {currentIdx > 0 && !isSubmitting && (
             <div className="pt-2">
               <button
                 type="button"
                 onClick={() => setCurrentIdx(prev => prev - 1)}
-                className="px-3.5 py-1.5 rounded-xl border border-slate-900 bg-slate-100 text-xs font-bold text-slate-600 shadow-[0_1.5px_0_#1E293B] active:translate-y-0.5 active:shadow-none flex items-center gap-1"
+                className="px-3.5 py-2 rounded-2xl border-2 border-slate-900 bg-white text-xs font-bold text-slate-700 shadow-[0_2px_0_#1E293B] active:translate-y-0.5 active:shadow-none flex items-center gap-1"
               >
-                <ArrowLeft className="w-3.5 h-3.5" />
+                <ArrowLeft className="w-4 h-4" />
                 <span>Previous Question</span>
               </button>
             </div>
           )}
 
           {isSubmitting && (
-            <div className="flex items-center justify-center gap-2 p-4 text-sm font-black text-slate-700">
-              <Loader2 className="w-5 h-5 animate-spin" />
+            <div className="flex items-center justify-center gap-2 p-4 text-sm font-black text-slate-800 bg-white/80 rounded-2xl border-2 border-slate-900 shadow-sm">
+              <Loader2 className="w-5 h-5 animate-spin text-pink-600" />
               <span>Calculating your verdict...</span>
             </div>
           )}

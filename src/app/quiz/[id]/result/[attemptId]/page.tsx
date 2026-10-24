@@ -15,6 +15,7 @@ import {
   Trophy
 } from "lucide-react";
 import { soundEffects } from "@/components/AudioEffects";
+import { KawaiiBear, KawaiiPanda, WavyUnderline } from "@/components/KawaiiCharacters";
 
 interface AttemptData {
   id: string;
@@ -143,18 +144,19 @@ function QuizResultContent({
   return (
     <div className="w-full max-w-md mx-auto px-4 py-8">
       {/* Main Verdict Card */}
-      <div className="bg-white border-3 border-slate-900 rounded-3xl p-6 sm:p-8 shadow-[0_8px_0_#1E293B] text-center mb-6">
-        {/* Verdict Badge */}
-        <div
-          className={`w-20 h-20 mx-auto rounded-3xl border-3 border-slate-900 flex items-center justify-center text-4xl mb-4 shadow-[0_4px_0_#1E293B] ${
-            isSafe
-              ? "bg-emerald-300"
-              : isWarning
-              ? "bg-yellow-300"
-              : "bg-rose-400"
-          }`}
-        >
-          {isSafe ? "👑" : isWarning ? "⚠️" : "🚫"}
+      <div className="bg-white border-3 border-slate-900 rounded-3xl p-6 sm:p-8 shadow-[0_8px_0_#1E293B] text-center mb-6 relative overflow-hidden">
+        {/* Animated Mascot Verdict */}
+        <div className="flex justify-center mb-3">
+          {isSafe ? (
+            <div className="flex items-center gap-2">
+              <KawaiiBear size="md" mood="happy" withDrink={true} />
+              <KawaiiPanda size="md" mood="happy" />
+            </div>
+          ) : isWarning ? (
+            <KawaiiBear size="md" mood="cute" withLaptop={true} />
+          ) : (
+            <KawaiiBear size="md" mood="smug" />
+          )}
         </div>
 
         <span className="text-xs font-black uppercase tracking-wider text-slate-500 block mb-1">
@@ -162,7 +164,22 @@ function QuizResultContent({
         </span>
 
         <h1 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight mb-2">
-          {isSafe ? "YOU ARE SAFE! 💖" : isWarning ? "ON THIN ICE! ⚠️" : "YOU ARE BLOCKED! 🚫"}
+          {isSafe ? (
+            <span className="text-emerald-600">
+              YOU ARE SAFE! 💖
+              <WavyUnderline color="green" className="mx-auto w-36 h-2 mt-1" />
+            </span>
+          ) : isWarning ? (
+            <span className="text-amber-600">
+              ON THIN ICE! ⚠️
+              <WavyUnderline color="yellow" className="mx-auto w-36 h-2 mt-1" />
+            </span>
+          ) : (
+            <span className="text-rose-600">
+              YOU ARE BLOCKED! 🚫
+              <WavyUnderline color="pink" className="mx-auto w-40 h-2 mt-1" />
+            </span>
+          )}
         </h1>
 
         <div className="inline-block px-4 py-1.5 rounded-full bg-slate-100 border-2 border-slate-900 font-mono font-black text-lg text-slate-900 mb-4 shadow-[0_2px_0_#1E293B]">
