@@ -682,6 +682,9 @@ export class GameStore {
     quizId: string,
     secretToken?: string
   ): Promise<{
+    quizId: string;
+    creatorName: string;
+    isCreator: boolean;
     quiz: ViralQuiz | null;
     attempts: ViralQuizAttempt[];
     totalPlayers: number;
@@ -746,10 +749,24 @@ export class GameStore {
 
     const safeCount = attempts.filter(a => a.verdict === "safe").length;
     const blockedCount = attempts.filter(a => a.verdict === "blocked").length;
+    const isCreator = Boolean(secretToken && quiz?.secretToken === secretToken);
 
     return {
-      quiz: secretToken && quiz?.secretToken === secretToken ? quiz : null,
-      attempts,
+      quizId: cleanId,
+      creatorName: quiz?.creatorName || "Friend",
+      isCreator,
+      quiz: isCreator ? quiz : null,
+      attempts: attempts.map(att => ({
+        id: att.id,
+        quizId: att.quizId,
+        friendName: att.friendName,
+        score: att.score,
+        total: att.total,
+        percentage: att.percentage,
+        verdict: att.verdict,
+        createdAt: att.createdAt,
+        answers: isCreator ? att.answers : []
+      })),
       totalPlayers: attempts.length,
       safeCount,
       blockedCount

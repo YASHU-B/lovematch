@@ -11,7 +11,8 @@ import {
   Loader2, 
   AlertCircle, 
   Copy, 
-  Check 
+  Check,
+  Trophy
 } from "lucide-react";
 import { soundEffects } from "@/components/AudioEffects";
 
@@ -190,6 +191,15 @@ function QuizResultContent({
           >
             {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
             <span>{copied ? "Link Copied!" : "Copy Result Link"}</span>
+          </button>
+
+          {/* View Full Leaderboard */}
+          <button
+            onClick={() => router.push(`/quiz/${id}/scores?attemptId=${attempt.id}`)}
+            className="w-full py-3.5 rounded-2xl bg-sky-200 hover:bg-sky-300 border-2.5 border-slate-900 text-slate-900 font-black text-sm shadow-[0_4px_0_#1E293B] active:translate-y-1 active:shadow-none transition-all flex items-center justify-center gap-2"
+          >
+            <Trophy className="w-4 h-4 text-yellow-600" />
+            <span>View Full Leaderboard & Rankings 🏆</span>
           </button>
         </div>
 
